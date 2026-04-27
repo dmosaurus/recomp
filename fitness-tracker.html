@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devin — Recomp Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --s1: #101010;
+  --s2: #161616;
+  --s3: #1e1e1e;
+  --border: #242424;
+  --border2: #2e2e2e;
+  --o: #ff5500;
+  --o2: rgba(255,85,0,0.15);
+  --o3: rgba(255,85,0,0.06);
+  --g: #00e5a0;
+  --g2: rgba(0,229,160,0.12);
+  --b: #3d9eff;
+  --b2: rgba(61,158,255,0.12);
+  --p: #b06aff;
+  --p2: rgba(176,106,255,0.12);
+  --y: #ffd93d;
+  --r: #ff3d5a;
+  --text: #efefef;
+  --t2: #999;
+  --t3: #555;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--s1);position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--text)}
+.nav-logo span{color:var(--o)}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto}
+.nav-tab{padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--t2);border-radius:3px;white-space:nowrap;background:none;border:none;transition:all 0.15s}
+.nav-tab:hover{color:var(--text);background:var(--s3)}
+.nav-tab.active{color:var(--o);background:var(--o3)}
+
+/* PANELS */
+.panel{display:none;padding:20px;max-width:900px;margin:0 auto}
+.panel.active{display:block}
+
+/* SECTION HEADERS */
+.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.sh h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text)}
+.sh span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:18px}
+.card+.card{margin-top:12px}
+.card-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--t2);margin-bottom:12px}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* STAT PILL */
+.stat-pill{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:14px 16px}
+.sp-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.sp-val{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1}
+.sp-sub{font-size:11px;color:var(--t2);margin-top:2px;font-weight:400}
+
+/* PHASE BADGE */
+.phase-badge{display:inline-flex;align-items:center;gap:8px;background:var(--o2);border:1px solid var(--o);border-radius:4px;padding:8px 14px;margin-bottom:20px}
+.pb-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--o);letter-spacing:1px}
+.pb-text{font-size:12px;color:var(--text);font-weight:600}
+.pb-sub{font-size:11px;color:var(--t2);margin-top:1px}
+
+/* WORKOUT DAY CARD */
+.wday{background:var(--s1);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.wday-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+.wday-header:hover{background:var(--s2)}
+.wday-left{display:flex;align-items:center;gap:12px}
+.wday-day{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--text);min-width:90px}
+.wday-name{font-weight:600;font-size:14px;color:var(--text)}
+.wday-sub{font-size:11px;color:var(--t2);margin-top:1px;font-weight:400}
+.wday-right{display:flex;align-items:center;gap:10px}
+.wday-dur{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)}
+.wday-body{display:none;padding:16px 18px}
+.wday-body.open{display:block}
+
+/* TAG */
+.tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase}
+.tc{background:var(--o2);color:var(--o)}
+.ts{background:var(--b2);color:var(--b)}
+.tr{background:var(--s3);color:var(--t2)}
+.tg{background:var(--g2);color:var(--g)}
+.tp{background:var(--p2);color:var(--p)}
+
+/* EXERCISE TABLE */
+.ex-table{width:100%;border-collapse:collapse;margin-top:12px}
+.ex-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.ex-table td{padding:10px 10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+.ex-table tr:last-child td{border-bottom:none}
+.ex-name{font-weight:600;color:var(--text)}
+.ex-sets{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--o)}
+.ex-load{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--b)}
+.ex-note{font-size:11px;color:var(--t2);margin-top:2px;font-weight:400}
+.overload-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--g);background:var(--g2);padding:2px 6px;border-radius:2px;margin-left:6px}
+
+/* LOG FORM */
+.log-form{background:var(--s2);border:1px solid var(--border2);border-radius:5px;padding:16px;margin-top:14px}
+.lf-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--o);margin-bottom:12px}
+.lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.lf-field{display:flex;flex-direction:column;gap:4px}
+.lf-field label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.lf-field input,.lf-field select,.lf-field textarea{background:var(--s3);border:1px solid var(--border2);border-radius:4px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.15s;width:100%}
+.lf-field input:focus,.lf-field select:focus,.lf-field textarea:focus{border-color:var(--o)}
+.lf-field textarea{resize:vertical;min-height:60px;font-size:11px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:4px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;border:none;transition:all 0.15s;font-weight:500}
+.btn-o{background:var(--o);color:#fff}
+.btn-o:hover{background:#ff7733}
+.btn-ghost{background:var(--s3);color:var(--t2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-sm{padding:6px 12px;font-size:10px}
+
+/* PROGRESS CHART */
+.chart-wrap{position:relative;height:160px;margin-top:8px}
+canvas{width:100%!important}
+
+/* LOG LIST */
+.log-entry{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--border)}
+.log-entry:last-child{border-bottom:none}
+.le-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);line-height:1.6}
+.le-content strong{font-size:13px;font-weight:600;color:var(--text)}
+.le-content p{font-size:11px;color:var(--t2);margin-top:2px;font-weight:400}
+.le-metric{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--o);text-align:right;white-space:nowrap}
+
+/* PROGRESS BARS */
+.prog-bar-wrap{background:var(--s3);border-radius:2px;height:4px;margin-top:6px;overflow:hidden}
+.prog-bar{height:100%;border-radius:2px;transition:width 0.6s ease}
+
+/* MILESTONE */
+.ms{display:grid;grid-template-columns:70px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);align-items:start}
+.ms:last-child{border-bottom:none}
+.ms-wk{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--o);letter-spacing:1px}
+.ms-phase{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.ms-title{font-weight:700;font-size:13px;color:var(--text);margin-bottom:3px}
+.ms-body{font-size:11px;color:var(--t2);line-height:1.6;font-weight:400}
+.ms-metrics{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ms-metric{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 7px;border-radius:2px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g);color:#000;padding:10px 20px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-icon{font-size:32px;margin-bottom:10px}
+.empty p{font-size:13px;line-height:1.6}
+
+@media(max-width:600px){
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+  .lf-grid{grid-template-columns:1fr 1fr}
+  .nav-logo{font-size:18px}
+  .nav-tab{font-size:9px;padding:7px 10px}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">Workout Logged ✓</div>
+
+<nav class="nav">
+  <div class="nav-logo">D<span>·</span>RECOMP</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="nav('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="nav('program')">Program</button>
+    <button class="nav-tab" onclick="nav('log')">Log Workout</button>
+    <button class="nav-tab" onclick="nav('history')">History</button>
+    <button class="nav-tab" onclick="nav('progress')">Progress</button>
+    <button class="nav-tab" onclick="nav('nutrition')">Nutrition</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="panel active">
+  <div style="margin-bottom:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--o);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">// Week 1 · Phase 1 · Apr 2026</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;line-height:0.95;margin-bottom:8px">YOUR <span style="color:var(--o)">STARTING</span><br>BASELINES</div>
+    <div style="font-size:13px;color:var(--t2);font-weight:400">Captured Apr 22, 2026 · Compare at weeks 4, 8, 12</div>
+  </div>
+
+  <div class="g4" style="margin-bottom:14px">
+    <div class="stat-pill" style="border-left:3px solid var(--o)">
+      <div class="sp-label">VO2 Max</div>
+      <div class="sp-val" style="color:var(--o)">43</div>
+      <div class="sp-sub">ml/kg/min · Below Avg</div>
+    </div>
+    <div class="stat-pill" style="border-left:3px solid var(--b)">
+      <div class="sp-label">Resting HR</div>
+      <div class="sp-val" style="color:var(--b)">69</div>
+      <div class="sp-sub">bpm · Trend: None</div>
+    </div>
+    <div class="stat-pill" style="border-left:3px solid var(--p)">
+      <div class="sp-label">HRV Avg</div>
+      <div class="sp-val" style="color:var(--p)">46</div>
+      <div class="sp-sub">ms · Low-end for age</div>
+    </div>
+    <div class="stat-pill" style="border-left:3px solid var(--g)">
+      <div class="sp-label">Zone 2 Pace</div>
+      <div class="sp-val" style="color:var(--g)">11:30</div>
+      <div class="sp-sub">min/mi at 133–140 bpm</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Workout #1 — Apr 22 ✓</div>
+      <div class="g3" style="gap:8px">
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px">TIME</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--o)">1:03:26</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px">MILES</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--b)">4.68</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px">AVG HR</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--g)">133</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--g2);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--g)">
+        ✓ Zone 2 avg nailed · 33:48 in zone · A− grade
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Phase 1 Progress</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--t2)">Workouts completed</span><span style="font-family:'JetBrains Mono',monospace;color:var(--o)" id="wcount">1 / 16</span></div>
+          <div class="prog-bar-wrap"><div class="prog-bar" style="width:6%;background:var(--o)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--t2)">Phase 1 weeks</span><span style="font-family:'JetBrains Mono',monospace;color:var(--b)">1 / 4</span></div>
+          <div class="prog-bar-wrap"><div class="prog-bar" style="width:25%;background:var(--b)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--t2)">12-week program</span><span style="font-family:'JetBrains Mono',monospace;color:var(--p)">Wk 1 / 12</span></div>
+          <div class="prog-bar-wrap"><div class="prog-bar" style="width:8%;background:var(--p)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Target Trajectory</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:4px">
+      <div style="padding:12px;border-right:1px solid var(--border);text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:6px">NOW</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--t2)">43</div>
+        <div style="font-size:10px;color:var(--t3)">VO2 Max</div>
+      </div>
+      <div style="padding:12px;border-right:1px solid var(--border);text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--b);letter-spacing:1px;margin-bottom:6px">WK 4–6</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--b)">45</div>
+        <div style="font-size:10px;color:var(--t3)">Above Avg</div>
+      </div>
+      <div style="padding:12px;border-right:1px solid var(--border);text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--g);letter-spacing:1px;margin-bottom:6px">WK 8–10</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--g)">49</div>
+        <div style="font-size:10px;color:var(--t3)">Good</div>
+      </div>
+      <div style="padding:12px;border-right:1px solid var(--border);text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--o);letter-spacing:1px;margin-bottom:6px">WK 12</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--o)">52</div>
+        <div style="font-size:10px;color:var(--t3)">Excellent</div>
+      </div>
+      <div style="padding:12px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--y);letter-spacing:1px;margin-bottom:6px">MO 5–6</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--y)">56+</div>
+        <div style="font-size:10px;color:var(--t3)">Elite Adj.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRAM -->
+<div id="program" class="panel">
+
+  <!-- Phase tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn btn-o btn-sm" onclick="showPhase(1,this)">Phase 1 — Wk 1–4</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPhase(2,this)">Phase 2 — Wk 5–8</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPhase(3,this)">Phase 3 — Wk 9–12</button>
+  </div>
+
+  <div id="phase1">
+    <div class="phase-badge">
+      <div class="pb-num">01</div>
+      <div><div class="pb-text">Base Building</div><div class="pb-sub">Weeks 1–4 · Aerobic foundation + movement patterns</div></div>
+    </div>
+    <div style="background:var(--o3);border:1px solid var(--o);border-radius:5px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text);font-weight:400;line-height:1.6">
+      <strong style="color:var(--o)">Overload Strategy:</strong> Zone 2 run duration +5 min/week. Lifting: add 5 lbs to lower body, 2.5 lbs upper body each week reps are completed cleanly. No intervals until Week 3.
+    </div>
+
+    <!-- SCHEDULE OVERVIEW -->
+    <div class="card" style="margin-bottom:16px"><div class="card-title">Phase 1 Schedule</div>
+      <table class="ex-table">
+        <tr><th>Day</th><th>Session</th><th>Duration</th><th>Key Focus</th></tr>
+        <tr><td class="ex-name">Monday</td><td>Upper Body Strength</td><td class="ex-sets">40–50 min</td><td><span class="overload-badge">+2.5 lbs upper / +1 rep/wk</span></td></tr>
+        <tr><td class="ex-name">Tuesday</td><td>Zone 2 Run — Long</td><td class="ex-sets">45→60 min</td><td><span class="overload-badge">+5 min each week · nose breathe only</span></td></tr>
+        <tr><td class="ex-name">Wednesday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Recovery between run and leg day</td></tr>
+        <tr><td class="ex-name">Thursday</td><td>Lower Body Strength</td><td class="ex-sets">40–50 min</td><td><span class="overload-badge">+5–10 lbs lower / trap bar focus</span></td></tr>
+        <tr><td class="ex-name">Friday</td><td>Zone 2 Run — Short</td><td class="ex-sets">30–35 min</td><td><span class="overload-badge">Active recovery · clears leg soreness from Thu</span></td></tr>
+        <tr><td class="ex-name">Saturday</td><td>Wk 1–2: Rest · Wk 3+: Norwegian 4×4</td><td class="ex-sets">0→55 min</td><td><span class="overload-badge">Intervals begin Week 3 only</span></td></tr>
+        <tr><td class="ex-name">Sunday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable recovery</td></tr>
+      </table>
+    </div>
+
+    <!-- UPPER BODY DETAIL -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Monday — Upper Body Strength <span class="tag ts" style="margin-left:8px">Lift</span></div>
+      <table class="ex-table">
+        <tr><th>Exercise</th><th>Sets × Reps</th><th>Wk 1 Load</th><th>Progression</th></tr>
+        <tr>
+          <td><div class="ex-name">Pull-Ups</div><div class="ex-note">Full ROM · dead hang start</div></td>
+          <td class="ex-sets">3 × 6–8</td>
+          <td class="ex-load">Bodyweight</td>
+          <td><span class="overload-badge">+1 rep/wk → add weight at 10</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Dips</div><div class="ex-note">Chest forward for pec · upright for tri</div></td>
+          <td class="ex-sets">3 × 8–10</td>
+          <td class="ex-load">Bodyweight</td>
+          <td><span class="overload-badge">+1 rep/wk → add weight at 12</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">DB Row</div><div class="ex-note">Each arm · elbow drives to hip</div></td>
+          <td class="ex-sets">3 × 10</td>
+          <td class="ex-load">40 lbs</td>
+          <td><span class="overload-badge">+2.5 lbs/wk</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Overhead Press</div><div class="ex-note">DB or bar · strict form · no leg drive</div></td>
+          <td class="ex-sets">3 × 8</td>
+          <td class="ex-load">30 lbs DB</td>
+          <td><span class="overload-badge">+2.5 lbs/wk</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Face Pulls / Band Pull-Apart</div><div class="ex-note">Rear delt health · rotator cuff protection</div></td>
+          <td class="ex-sets">3 × 15</td>
+          <td class="ex-load">Light band</td>
+          <td><span class="overload-badge">+5 reps/2wks</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Ab Wheel / Plank</div><div class="ex-note">Alternate each session</div></td>
+          <td class="ex-sets">3 × max / 3 × 30s</td>
+          <td class="ex-load">—</td>
+          <td><span class="overload-badge">+5s plank / +1 rep/wk</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- TUESDAY ZONE 2 LONG -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Tuesday — Zone 2 Run Long <span class="tag tc" style="margin-left:8px">Cardio</span></div>
+      <table class="ex-table">
+        <tr><th>Phase</th><th>Duration</th><th>Target HR</th><th>Notes</th></tr>
+        <tr><td class="ex-name">Warm-up walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;120 bpm</td><td><span class="ex-note">Brisk 3.5 mph</span></td></tr>
+        <tr><td class="ex-name">Zone 2 sustained</td><td class="ex-sets">Wk1: 40min → Wk4: 55min</td><td class="ex-load">133–140 bpm</td><td><span class="ex-note">Nose breathing only · slow pace to protect zone · cardiac drift is normal</span></td></tr>
+        <tr><td class="ex-name">Cool-down walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;100 bpm</td><td><span class="ex-note">Do not skip</span></td></tr>
+      </table>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--o3);border-radius:4px;font-size:11px;color:var(--t2)">
+        <strong style="color:var(--o)">Overload:</strong> +5 min to Zone 2 block each week (Wk1: 40 · Wk2: 45 · Wk3: 50 · Wk4: 55). Pace will naturally increase as fitness improves — do NOT chase pace, chase the HR number.
+      </div>
+    </div>
+
+    <!-- WEDNESDAY FULL REST -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Wednesday — Full Rest <span class="tag tr" style="margin-left:8px">Rest</span></div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7;font-weight:400;padding:4px 0">
+        Complete rest between Tuesday's long run and Thursday's heavy lower body session. This is where aerobic adaptation from Tuesday actually happens. Optional: 10–15 min of light stretching or mobility work only — no cardio, no lifting.
+      </div>
+    </div>
+
+    <!-- LOWER BODY DETAIL -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Thursday — Lower Body Strength <span class="tag ts" style="margin-left:8px">Lift</span></div>
+      <table class="ex-table">
+        <tr><th>Exercise</th><th>Sets × Reps</th><th>Wk 1 Load</th><th>Progression</th></tr>
+        <tr>
+          <td><div class="ex-name">Trap Bar Deadlift</div><div class="ex-note">Your strongest pattern · build from here</div></td>
+          <td class="ex-sets">4 × 5</td>
+          <td class="ex-load">185 lbs</td>
+          <td><span class="overload-badge">+10 lbs/wk until form breaks</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Goblet Squat</div><div class="ex-note">KB or DB · full depth · 3s eccentric</div></td>
+          <td class="ex-sets">3 × 10</td>
+          <td class="ex-load">45 lbs</td>
+          <td><span class="overload-badge">+5 lbs/wk</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Romanian Deadlift</div><div class="ex-note">Hamstring hinge · slight knee bend · bar stays close</div></td>
+          <td class="ex-sets">3 × 10</td>
+          <td class="ex-load">95 lbs bar</td>
+          <td><span class="overload-badge">+5 lbs/wk</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Reverse Lunges</div><div class="ex-note">Each leg · DB in hands · knee tracks over toe</div></td>
+          <td class="ex-sets">3 × 8/leg</td>
+          <td class="ex-load">25 lbs DB</td>
+          <td><span class="overload-badge">+5 lbs/2wks</span></td>
+        </tr>
+        <tr>
+          <td><div class="ex-name">Calf Raises</div><div class="ex-note">Single leg · slow tempo · full ROM</div></td>
+          <td class="ex-sets">3 × 15</td>
+          <td class="ex-load">Bodyweight</td>
+          <td><span class="overload-badge">+DB weight wk 3</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- FRIDAY ZONE 2 SHORT -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Friday — Zone 2 Run Short <span class="tag tc" style="margin-left:8px">Cardio</span></div>
+      <table class="ex-table">
+        <tr><th>Phase</th><th>Duration</th><th>Target HR</th><th>Notes</th></tr>
+        <tr><td class="ex-name">Warm-up walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;120 bpm</td><td><span class="ex-note">Brisk 3.5 mph · let HR settle</span></td></tr>
+        <tr><td class="ex-name">Zone 2 easy run</td><td class="ex-sets">20–25 min</td><td class="ex-load">133–140 bpm</td><td><span class="ex-note">Blood flow recovery from Thursday's heavy legs · nose breathe · if HR spikes, walk</span></td></tr>
+        <tr><td class="ex-name">Cool-down walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;100 bpm</td><td><span class="ex-note">Do not skip</span></td></tr>
+      </table>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--o3);border-radius:4px;font-size:11px;color:var(--t2)">
+        <strong style="color:var(--o)">Purpose:</strong> Light Zone 2 blood flow accelerates clearance of Thursday's leg soreness without adding meaningful fatigue. Legs should feel noticeably better after this run than before it. If soreness is severe, walk the whole thing — still counts.
+      </div>
+    </div>
+
+    <!-- SAT INTERVALS -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Saturday — Norwegian 4×4 Intervals (Begins Week 3) <span class="tag tg" style="margin-left:8px">Intervals</span></div>
+      <div style="padding:10px 12px;background:var(--b2);border-radius:4px;font-size:12px;color:var(--b);margin-bottom:12px">
+        <strong>Weeks 1–2:</strong> Complete rest or 20–30 min easy walk only. Do not add intervals early — let the aerobic base develop first.
+      </div>
+      <table class="ex-table">
+        <tr><th>Wk 3+ Phase</th><th>Duration</th><th>Target HR</th><th>Notes</th></tr>
+        <tr><td class="ex-name">Warm-up jog</td><td class="ex-sets">10 min</td><td class="ex-load">133–140 bpm</td><td><span class="ex-note">Build gradually before first interval</span></td></tr>
+        <tr><td class="ex-name">4× Hard intervals</td><td class="ex-sets">4 min each</td><td class="ex-load">180–190 bpm</td><td><span class="ex-note">Only 2–3 words out. Controlled, not a sprint</span></td></tr>
+        <tr><td class="ex-name">4× Active recovery</td><td class="ex-sets">3 min each</td><td class="ex-load">~120 bpm</td><td><span class="ex-note">HR must drop to ~120 before starting next rep</span></td></tr>
+        <tr><td class="ex-name">Cool-down walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;100 bpm</td><td><span class="ex-note">Do not stop abruptly</span></td></tr>
+      </table>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--o3);border-radius:4px;font-size:11px;color:var(--t2)">
+        <strong style="color:var(--o)">Wk 4 overload:</strong> Add a 5th interval only if all 4 felt fully controlled and HR recovery between reps was clean. Never progress if form or HR recovery degrades.
+      </div>
+    </div>
+  </div>
+
+  <div id="phase2" style="display:none">
+    <div class="phase-badge" style="background:var(--b2);border-color:var(--b)">
+      <div class="pb-num" style="color:var(--b)">02</div>
+      <div><div class="pb-text">Load Introduction</div><div class="pb-sub">Weeks 5–8 · Add intervals · Increase weights · Extend long run</div></div>
+    </div>
+    <div style="background:var(--b2);border:1px solid var(--b);border-radius:5px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.6">
+      <strong style="color:var(--b)">Overload Strategy:</strong> Two Norwegian 4×4 sessions/week (Tue + Sat). Long run extended to 60–70 min. Lift weights increase 5–10% from Phase 1 final week. Begin tracking 1RM estimates for deadlift.
+    </div>
+    <div class="card"><div class="card-title">Phase 2 Schedule</div>
+      <table class="ex-table">
+        <tr><th>Day</th><th>Session</th><th>Duration</th><th>Key Change from Ph.1</th></tr>
+        <tr><td class="ex-name">Monday</td><td>Upper Strength</td><td class="ex-sets">45–55 min</td><td><span class="overload-badge">+5–10% weight from Ph.1 peak</span></td></tr>
+        <tr><td class="ex-name">Tuesday</td><td>Zone 2 Long Run</td><td class="ex-sets">60–70 min</td><td><span class="overload-badge">+10–15 min from Phase 1</span></td></tr>
+        <tr><td class="ex-name">Wednesday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Recovery between long run and leg day</td></tr>
+        <tr><td class="ex-name">Thursday</td><td>Lower Strength</td><td class="ex-sets">45–55 min</td><td><span class="overload-badge">Straight bar deadlift introduced</span></td></tr>
+        <tr><td class="ex-name">Friday</td><td>Zone 2 Short Run</td><td class="ex-sets">35 min</td><td><span class="overload-badge">Active recovery · pace now 10:30–11:00 at same HR</span></td></tr>
+        <tr><td class="ex-name">Saturday</td><td>Norwegian 4×4 Intervals</td><td class="ex-sets">45 min</td><td><span class="overload-badge">5 intervals if 4 felt easy in Ph.1</span></td></tr>
+        <tr><td class="ex-name">Sunday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable recovery</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="phase3" style="display:none">
+    <div class="phase-badge" style="background:var(--g2);border-color:var(--g)">
+      <div class="pb-num" style="color:var(--g)">03</div>
+      <div><div class="pb-text">Peak Intensity</div><div class="pb-sub">Weeks 9–12 · Max VO2 stimulus · Strength peaks · Recomp visible</div></div>
+    </div>
+    <div style="background:var(--g2);border:1px solid var(--g);border-radius:5px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.6">
+      <strong style="color:var(--g)">Overload Strategy:</strong> Long run 70–80 min. Add 5×4 Norwegian sets. Straight bar deadlift targets 265–285 lbs. Re-test Zone 2 pace at week 12 and compare to baseline. Full metric reassessment.
+    </div>
+    <div class="card"><div class="card-title">Phase 3 Schedule</div>
+      <table class="ex-table">
+        <tr><th>Day</th><th>Session</th><th>Duration</th><th>Key Target</th></tr>
+        <tr><td class="ex-name">Monday</td><td>Upper Strength</td><td class="ex-sets">50–60 min</td><td><span class="overload-badge">Pull-ups +weight · Press PR attempt</span></td></tr>
+        <tr><td class="ex-name">Tuesday</td><td>Zone 2 Long Run</td><td class="ex-sets">70–80 min</td><td><span class="overload-badge">Zone 2 pace should be ~10:00/mi now</span></td></tr>
+        <tr><td class="ex-name">Wednesday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable — long run recovery</td></tr>
+        <tr><td class="ex-name">Thursday</td><td>Lower Strength</td><td class="ex-sets">50–60 min</td><td><span class="overload-badge">Deadlift 265–285 lbs target</span></td></tr>
+        <tr><td class="ex-name">Friday</td><td>Zone 2 Short + Strides</td><td class="ex-sets">40 min</td><td><span class="overload-badge">Active recovery + 4×20s strides at end — first fast running</span></td></tr>
+        <tr><td class="ex-name">Saturday</td><td>Norwegian 5×4 Intervals</td><td class="ex-sets">50 min</td><td><span class="overload-badge">HR should hit 185–192 by rep 4–5</span></td></tr>
+        <tr><td class="ex-name">Sunday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable recovery</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- LOG WORKOUT -->
+<div id="log" class="panel">
+  <div class="sh"><h2>Log Workout</h2><span>capture every session</span></div>
+
+  <!-- CSV TOOLBAR -->
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--o);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">// CSV Database</div>
+      <div style="font-size:12px;color:var(--t2);font-weight:400;line-height:1.5">Every save downloads <strong style="color:var(--text)">devin_workouts.csv</strong> (master) + a timestamped backup.<br>Store master in iCloud Files. Import it here to restore history.</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="importCsv()">⬆ Import CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCsv()">⬇ Export CSV</button>
+    </div>
+  </div>
+  <input type="file" id="csv-import-input" accept=".csv" style="display:none" onchange="handleImport(event)">
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Session Type</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-o btn-sm" onclick="setType('Zone 2 Run',this)">Zone 2 Run</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Norwegian Intervals',this)">Norwegian Intervals</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Upper Strength',this)">Upper Strength</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Lower Strength',this)">Lower Strength</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Active Recovery',this)">Active Recovery</button>
+    </div>
+  </div>
+
+  <!-- CARDIO LOG -->
+  <div id="log-cardio" class="card" style="margin-bottom:14px">
+    <div class="card-title">Cardio Metrics</div>
+    <div class="log-form">
+      <div class="lf-title">// Session Data</div>
+      <div class="lf-grid">
+        <div class="lf-field"><label>Date</label><input type="date" id="c-date"></div>
+        <div class="lf-field"><label>Duration (min)</label><input type="number" id="c-dur" placeholder="63"></div>
+        <div class="lf-field"><label>Distance (mi)</label><input type="number" step="0.01" id="c-dist" placeholder="4.68"></div>
+        <div class="lf-field"><label>Avg HR (bpm)</label><input type="number" id="c-hr" placeholder="133"></div>
+        <div class="lf-field"><label>Max HR (bpm)</label><input type="number" id="c-maxhr" placeholder="154"></div>
+        <div class="lf-field"><label>Calories burned</label><input type="number" id="c-cal" placeholder="596"></div>
+        <div class="lf-field"><label>Zone 2 time (min)</label><input type="number" id="c-z2" placeholder="33"></div>
+        <div class="lf-field"><label>Avg Pace (min/mi)</label><input type="text" id="c-pace" placeholder="13:33"></div>
+        <div class="lf-field"><label>Effort (1–10)</label><input type="number" min="1" max="10" id="c-effort" placeholder="5"></div>
+      </div>
+      <div class="lf-field" style="margin-bottom:10px"><label>Notes</label><textarea id="c-notes" placeholder="How did it feel? HR drift? Breathing? Weather?"></textarea></div>
+      <button class="btn btn-o" onclick="saveCardio()">Save Session</button>
+    </div>
+  </div>
+
+  <!-- STRENGTH LOG -->
+  <div id="log-strength" class="card" style="display:none;margin-bottom:14px">
+    <div class="card-title">Strength Metrics</div>
+    <div class="log-form">
+      <div class="lf-title">// Lift Data</div>
+      <div class="lf-grid" style="grid-template-columns:1fr 1fr">
+        <div class="lf-field"><label>Date</label><input type="date" id="s-date"></div>
+        <div class="lf-field"><label>Session Type</label><input type="text" id="s-type" placeholder="Upper / Lower"></div>
+      </div>
+      <div style="margin:12px 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:1px;text-transform:uppercase">Exercises</div>
+      <div id="ex-list"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addExercise()" style="margin-bottom:12px">+ Add Exercise</button>
+      <div class="lf-field" style="margin-bottom:10px"><label>Notes</label><textarea id="s-notes" placeholder="What felt strong? What was hard? Any form issues?"></textarea></div>
+      <button class="btn btn-o" onclick="saveStrength()">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="history" class="panel">
+  <div class="sh"><h2>Workout History</h2><span>all logged sessions</span></div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="importCsv()">⬆ Import CSV to restore</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCsv()">⬇ Export full CSV</button>
+  </div>
+  <div id="history-list">
+    <!-- Pre-loaded with Workout #1 -->
+    <div class="card" style="border-left:3px solid var(--g)">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+        <div>
+          <div style="font-weight:700;font-size:15px;color:var(--text)">Zone 2 Treadmill Run</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:2px">Wed Apr 22, 2026 · Workout #1</div>
+        </div>
+        <span class="tag tg">A− Grade</span>
+      </div>
+      <div class="g4" style="gap:8px;margin-bottom:10px">
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">TIME</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--o)">1:03:26</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">MILES</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--b)">4.68</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">AVG HR</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--g)">133 bpm</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">CALS</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--y)">596</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--t2);line-height:1.6;padding:10px;background:var(--s2);border-radius:4px">
+        Avg pace 13:33/mi · 33:48 in Zone 2 · 4:32 Zone 3 drift · HR managed via speed reduction to 2.8 mph in final miles. Cardiac drift identified. Zone 2 pace baseline: ~11:00–11:30 min/mi.
+      </div>
+    </div>
+    <div id="dynamic-history"></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div id="progress" class="panel">
+  <div class="sh"><h2>Progress Charts</h2><span>updated as you log</span></div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Zone 2 Avg HR Over Time</div>
+      <canvas id="hrChart" height="140"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Distance Per Run</div>
+      <canvas id="distChart" height="140"></canvas>
+    </div>
+  </div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Deadlift Progression (lbs)</div>
+      <canvas id="dlChart" height="140"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Calories Burned Per Session</div>
+      <canvas id="calChart" height="140"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">12-Week Milestone Map</div>
+    <div id="milestone-map">
+      <div class="ms">
+        <div><div class="ms-wk">Wk 1–2</div><div class="ms-phase">Phase 1</div></div>
+        <div><div class="ms-title">Base Building — Complete first Zone 2 sessions</div><div class="ms-body">Zone 2 discipline established. No intervals. Sugar swaps begin. Resting HR monitoring starts.</div>
+        <div class="ms-metrics"><span class="ms-metric" style="background:var(--o2);color:var(--o)">VO2: 43 baseline</span><span class="ms-metric" style="background:var(--b2);color:var(--b)">RHR: 69 baseline</span><span class="ms-metric" style="background:var(--p2);color:var(--p)">HRV: 46ms baseline</span></div></div>
+      </div>
+      <div class="ms">
+        <div><div class="ms-wk">Wk 3–4</div><div class="ms-phase">Phase 1</div></div>
+        <div><div class="ms-title">First Intervals + Strength Loading</div><div class="ms-body">Norwegian 4×4 introduced Saturday. Zone 2 pace should feel slightly easier at same HR. Belt may feel looser.</div>
+        <div class="ms-metrics"><span class="ms-metric" style="background:var(--g2);color:var(--g)">Zone 2 pace: ~11:00</span><span class="ms-metric" style="background:var(--b2);color:var(--b)">RHR target: 66–68</span></div></div>
+      </div>
+      <div class="ms">
+        <div><div class="ms-wk">Wk 5–6</div><div class="ms-phase">Phase 2</div></div>
+        <div><div class="ms-title">Visible Body Composition Shift</div><div class="ms-body">Two interval sessions/week. Mirror change becomes noticeable. Zone 2 pace improving. Strength PRs in compound lifts.</div>
+        <div class="ms-metrics"><span class="ms-metric" style="background:var(--o2);color:var(--o)">VO2 target: 45–46</span><span class="ms-metric" style="background:var(--g2);color:var(--g)">Zone 2 pace: ~10:30</span></div></div>
+      </div>
+      <div class="ms">
+        <div><div class="ms-wk">Wk 7–8</div><div class="ms-phase">Phase 2</div></div>
+        <div><div class="ms-title">VO2 Max Climbing — Check Apple Health</div><div class="ms-body">Apple Health VO2 estimate should tick upward. Resting HR approaching low 60s. Post-workout recovery dropping 30+ bpm in first minute.</div>
+        <div class="ms-metrics"><span class="ms-metric" style="background:var(--o2);color:var(--o)">VO2 target: 47–49</span><span class="ms-metric" style="background:var(--b2);color:var(--b)">RHR target: 62–64</span><span class="ms-metric" style="background:var(--p2);color:var(--p)">HRV target: 52–56ms</span></div></div>
+      </div>
+      <div class="ms">
+        <div><div class="ms-wk">Wk 9–12</div><div class="ms-phase">Phase 3</div></div>
+        <div><div class="ms-title">Peak Phase — Full Reassessment at Wk 12</div><div class="ms-body">Dramatic recomp visible. Zone 2 pace near 10:00/mi. Deadlift 265–285 lbs. Re-screenshot all baseline metrics and compare.</div>
+        <div class="ms-metrics"><span class="ms-metric" style="background:var(--o2);color:var(--o)">VO2 target: 50–53</span><span class="ms-metric" style="background:var(--b2);color:var(--b)">RHR target: 60–63</span><span class="ms-metric" style="background:var(--g2);color:var(--g)">Zone 2 pace: ~10:00</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NUTRITION -->
+<div id="nutrition" class="panel">
+  <div class="sh"><h2>Nutrition Log</h2><span>daily tracking · separate CSV</span></div>
+
+  <!-- CSV TOOLBAR -->
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--y);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">// Nutrition CSV Database</div>
+      <div style="font-size:12px;color:var(--t2);font-weight:400;line-height:1.5">Saves to <strong style="color:var(--text)">devin_nutrition.csv</strong> (master) + timestamped backup on every entry.<br>Store master in iCloud Files → Workouts folder.</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="importNutritionCsv()">⬆ Import CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportNutritionCsv()">⬇ Export CSV</button>
+    </div>
+  </div>
+  <input type="file" id="nutrition-import-input" accept=".csv" style="display:none" onchange="handleNutritionImport(event)">
+
+  <!-- DAILY TARGETS SUMMARY -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Daily Targets — <span id="nutrition-date-label" style="color:var(--text)">Today</span>
+      <input type="date" id="n-view-date" style="background:var(--s3);border:1px solid var(--border2);border-radius:3px;padding:4px 8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;margin-left:10px;outline:none" onchange="renderNutritionDay()">
+    </div>
+    <div class="g4" style="margin-bottom:14px">
+      <div class="stat-pill" style="border-left:3px solid var(--o)">
+        <div class="sp-label">Calories</div>
+        <div class="sp-val" style="color:var(--o);font-size:24px" id="n-total-cal">0</div>
+        <div class="sp-sub">Target: ~2,150–2,450</div>
+        <div class="prog-bar-wrap" style="margin-top:8px"><div class="prog-bar" id="n-bar-cal" style="background:var(--o);width:0%"></div></div>
+      </div>
+      <div class="stat-pill" style="border-left:3px solid var(--g)">
+        <div class="sp-label">Protein</div>
+        <div class="sp-val" style="color:var(--g);font-size:24px" id="n-total-pro">0g</div>
+        <div class="sp-sub">Target: 165g</div>
+        <div class="prog-bar-wrap" style="margin-top:8px"><div class="prog-bar" id="n-bar-pro" style="background:var(--g);width:0%"></div></div>
+      </div>
+      <div class="stat-pill" style="border-left:3px solid var(--b)">
+        <div class="sp-label">Carbs</div>
+        <div class="sp-val" style="color:var(--b);font-size:24px" id="n-total-carb">0g</div>
+        <div class="sp-sub">Target: ~185g</div>
+        <div class="prog-bar-wrap" style="margin-top:8px"><div class="prog-bar" id="n-bar-carb" style="background:var(--b);width:0%"></div></div>
+      </div>
+      <div class="stat-pill" style="border-left:3px solid var(--p)">
+        <div class="sp-label">Fat</div>
+        <div class="sp-val" style="color:var(--p);font-size:24px" id="n-total-fat">0g</div>
+        <div class="sp-sub">Target: ~75g</div>
+        <div class="prog-bar-wrap" style="margin-top:8px"><div class="prog-bar" id="n-bar-fat" style="background:var(--p);width:0%"></div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;font-size:12px;color:var(--t2);flex-wrap:wrap">
+      <span>Sugar: <strong id="n-total-sugar" style="color:var(--r)">0g</strong></span>
+      <span>Fiber: <strong id="n-total-fiber" style="color:var(--g)">0g</strong></span>
+      <span>Remaining cal: <strong id="n-remaining" style="color:var(--y)">2,300</strong></span>
+      <span>Protein gap: <strong id="n-pro-gap" style="color:var(--g)">165g</strong></span>
+    </div>
+  </div>
+
+  <!-- MEAL BREAKDOWN -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Meals</div>
+    <div id="n-meal-breakdown">
+      <div style="color:var(--t3);font-size:13px;padding:16px 0;text-align:center">No entries yet — log food below</div>
+    </div>
+  </div>
+
+  <!-- LOG FOOD FORM -->
+  <div class="card">
+    <div class="card-title">Log Food Item</div>
+    <div class="log-form">
+      <div class="lf-title">// Food Entry</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="meal-type-btns">
+        <button class="btn btn-o btn-sm" onclick="setMealType('Breakfast',this)">Breakfast</button>
+        <button class="btn btn-ghost btn-sm" onclick="setMealType('Lunch',this)">Lunch</button>
+        <button class="btn btn-ghost btn-sm" onclick="setMealType('Dinner',this)">Dinner</button>
+        <button class="btn btn-ghost btn-sm" onclick="setMealType('Snack',this)">Snack</button>
+        <button class="btn btn-ghost btn-sm" onclick="setMealType('Pre-Workout',this)">Pre-Workout</button>
+        <button class="btn btn-ghost btn-sm" onclick="setMealType('Post-Workout',this)">Post-Workout</button>
+        <button class="btn btn-ghost btn-sm" onclick="setMealType('Supplement',this)">Supplement</button>
+      </div>
+      <div class="lf-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="lf-field"><label>Date</label><input type="date" id="n-date"></div>
+        <div class="lf-field" style="grid-column:span 2"><label>Food Item</label><input type="text" id="n-food" placeholder="e.g. HEB Honey Turkey, Thorne Whey"></div>
+        <div class="lf-field"><label>Serving Size</label><input type="number" step="0.1" id="n-serving-size" placeholder="2"></div>
+        <div class="lf-field"><label>Serving Unit</label>
+          <select id="n-serving-unit">
+            <option>oz</option><option>g</option><option>cup</option><option>tbsp</option>
+            <option>tsp</option><option>slice</option><option>piece</option>
+            <option>scoop</option><option>container</option><option>packet</option><option>serving</option>
+          </select>
+        </div>
+        <div class="lf-field"><label>Calories</label><input type="number" id="n-cal" placeholder="70"></div>
+        <div class="lf-field"><label>Protein (g)</label><input type="number" step="0.1" id="n-pro" placeholder="10"></div>
+        <div class="lf-field"><label>Carbs (g)</label><input type="number" step="0.1" id="n-carb" placeholder="3"></div>
+        <div class="lf-field"><label>Fat (g)</label><input type="number" step="0.1" id="n-fat" placeholder="1.5"></div>
+        <div class="lf-field"><label>Sugar (g)</label><input type="number" step="0.1" id="n-sugar" placeholder="3"></div>
+        <div class="lf-field"><label>Fiber (g)</label><input type="number" step="0.1" id="n-fiber" placeholder="0"></div>
+      </div>
+      <div class="lf-field" style="margin:10px 0"><label>Notes (optional)</label>
+        <input type="text" id="n-notes" placeholder="e.g. post-workout · pre-meal shake">
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Quick Add — Your Foods</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('turkey')">Turkey 2oz</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('sourdough')">Sourdough slice</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('cheddar')">Cheddar slice</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('skyr')">Skyr yogurt</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('banana')">Banana</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('mandarin')">Mandarin</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('carrots')">Carrots 7oz</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('pbcrackers')">PB Crackers</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('whey')">Thorne Whey</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('cottage')">Cottage Cheese</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickAdd('miraclewhip')">Miracle Whip</button>
+        </div>
+      </div>
+      <button class="btn btn-o" onclick="saveNutrition()">Save Food Entry + Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+let sessionType = 'Zone 2 Run';
+let workouts = JSON.parse(localStorage.getItem('dx_workouts') || '[]');
+
+// Seed with workout #1 if empty
+if(workouts.length === 0) {
+  workouts.push({type:'Zone 2 Run',date:'2026-04-22',dur:63,dist:4.68,hr:133,maxhr:154,cal:596,z2:34,pace:'13:33',effort:5,notes:'First workout back. Cardiac drift to Zone 3 in miles 2-4. Had to slow to 2.8mph to manage HR. Zone 2 baseline pace: ~11:30 min/mi.'});
+  saveLocal();
+}
+
+function saveLocal(){
+  localStorage.setItem('dx_workouts', JSON.stringify(workouts));
+}
+
+// ── CSV SCHEMA ─────────────────────────────────────────
+// One row per exercise for strength; one row per session for cardio
+const CSV_HEADERS = [
+  'date','workout_type','duration_min','distance_mi','avg_hr','max_hr',
+  'calories','zone2_min','avg_pace','effort',
+  'exercise_name','sets','reps','weight_lbs','notes'
+];
+
+function escapeCsv(val){
+  if(val == null || val === '') return '';
+  const s = String(val);
+  if(s.includes(',') || s.includes('"') || s.includes('\n'))
+    return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+
+function workoutsToCsvRows(data){
+  const rows = [CSV_HEADERS.join(',')];
+  data.forEach(w => {
+    const base = [
+      w.date, w.type,
+      w.dur||'', w.dist||'', w.hr||'', w.maxhr||'',
+      w.cal||'', w.z2||'', w.pace||'', w.effort||''
+    ];
+    if(w.exercises && w.exercises.length > 0){
+      // One row per exercise for strength sessions
+      w.exercises.forEach((ex, i) => {
+        const note = i === 0 ? (w.notes||'') : ''; // notes only on first row
+        rows.push([...base, ex.name||'', ex.sets||'', ex.reps||'', ex.weight||'', note].map(escapeCsv).join(','));
+      });
+    } else {
+      rows.push([...base, '', '', '', '', w.notes||''].map(escapeCsv).join(','));
+    }
+  });
+  return rows.join('\n');
+}
+
+function parseCsvToWorkouts(csvText){
+  const lines = csvText.trim().split('\n');
+  if(lines.length < 2) return [];
+  // Skip header row
+  const dataLines = lines.slice(1);
+  const sessionMap = {};
+  dataLines.forEach(line => {
+    if(!line.trim()) return;
+    // Parse CSV row respecting quoted fields
+    const cols = parseCsvLine(line);
+    const [date, type, dur, dist, hr, maxhr, cal, z2, pace, effort,
+           exName, sets, reps, weight, notes] = cols;
+    const key = date + '|' + type;
+    if(!sessionMap[key]){
+      sessionMap[key] = {
+        date, type,
+        dur: +dur||0, dist: +dist||0, hr: +hr||0, maxhr: +maxhr||0,
+        cal: +cal||0, z2: +z2||0, pace, effort: +effort||0,
+        notes: notes||'',
+        exercises: []
+      };
+    }
+    if(exName && exName.trim()){
+      sessionMap[key].exercises.push({name:exName, sets, reps, weight});
+    }
+    // Append notes from first row that has them
+    if(notes && !sessionMap[key].notes) sessionMap[key].notes = notes;
+  });
+  return Object.values(sessionMap);
+}
+
+function parseCsvLine(line){
+  const result = [];
+  let cur = '', inQuote = false;
+  for(let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if(ch === '"'){
+      if(inQuote && line[i+1] === '"'){ cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if(ch === ',' && !inQuote){
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── DOWNLOAD HELPERS ───────────────────────────────────
+function downloadCsv(filename, csvContent){
+  const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.style.display = 'none';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportCsv(){
+  const csv = workoutsToCsvRows(workouts);
+  const today = new Date().toISOString().split('T')[0];
+  // 1. Download backup first (previous state before any new write)
+  downloadCsv(`devin_workouts_backup_${today}.csv`, csv);
+  // 2. Short delay then download master (so browser handles both)
+  setTimeout(() => downloadCsv('devin_workouts.csv', csv), 600);
+  toastMsg('CSV exported — save devin_workouts.csv to iCloud ✓');
+}
+
+// Called after every new workout save — exports updated master + backup
+function saveAndExport(){
+  saveLocal();
+  const csv = workoutsToCsvRows(workouts);
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  // Backup of state BEFORE this write was already in localStorage —
+  // we export the NEW full dataset as master, and a timestamped backup
+  setTimeout(() => downloadCsv(`devin_workouts_backup_${ts}.csv`, csv), 400);
+  setTimeout(() => downloadCsv('devin_workouts.csv', csv), 900);
+}
+
+// ── IMPORT FROM CSV ────────────────────────────────────
+function importCsv(){
+  document.getElementById('csv-import-input').click();
+}
+
+function handleImport(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const parsed = parseCsvToWorkouts(e.target.result);
+      if(parsed.length === 0){ toastMsg('⚠ No data found in file'); return; }
+      // Merge: keep any local workouts not in CSV, add all CSV workouts
+      const csvKeys = new Set(parsed.map(w => w.date+'|'+w.type));
+      const localOnly = workouts.filter(w => !csvKeys.has(w.date+'|'+w.type));
+      workouts = [...parsed, ...localOnly].sort((a,b)=>a.date.localeCompare(b.date));
+      saveLocal();
+      toastMsg(`Imported ${parsed.length} sessions ✓`);
+      renderHistory();
+    } catch(err){
+      toastMsg('⚠ Import error — check file format');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  // Reset input so same file can be re-imported
+  event.target.value = '';
+}
+
+function nav(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='progress') drawCharts();
+  if(id==='history') renderHistory();
+  if(id==='nutrition') renderNutritionDay();
+}
+
+function toggleDay(el){
+  const body = el.nextElementSibling;
+  body.classList.toggle('open');
+  const icon = el.querySelector('div:last-child div:last-child');
+  icon.textContent = body.classList.contains('open') ? '－' : '＋';
+}
+
+function showPhase(n, btn){
+  [1,2,3].forEach(i=>{
+    const el = document.getElementById('phase'+i);
+    if(el) el.style.display = i===n ? 'block' : 'none';
+  });
+  document.querySelectorAll('#program .btn').forEach(b=>{ b.className='btn btn-ghost btn-sm'; b.onclick=b.onclick; });
+  btn.className='btn btn-o btn-sm';
+}
+
+function setType(type, btn){
+  sessionType = type;
+  document.querySelectorAll('#log .btn-sm').forEach(b=>{ if(!b.id) { b.className='btn btn-ghost btn-sm'; } });
+  btn.className='btn btn-o btn-sm';
+  const isStrength = type==='Upper Strength'||type==='Lower Strength';
+  document.getElementById('log-cardio').style.display = isStrength ? 'none' : 'block';
+  document.getElementById('log-strength').style.display = isStrength ? 'block' : 'none';
+  if(isStrength) { document.getElementById('s-type').value=type; if(!document.querySelector('.ex-row')) addExercise(); }
+}
+
+let exCount = 0;
+function addExercise(){
+  exCount++;
+  const div = document.createElement('div');
+  div.className='ex-row';
+  div.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px;align-items:end';
+  div.innerHTML=`
+    <div class="lf-field"><label>Exercise</label><input type="text" placeholder="Trap Bar Deadlift"></div>
+    <div class="lf-field"><label>Sets</label><input type="number" placeholder="4"></div>
+    <div class="lf-field"><label>Reps</label><input type="number" placeholder="5"></div>
+    <div class="lf-field"><label>Weight (lbs)</label><input type="number" placeholder="185"></div>
+  `;
+  document.getElementById('ex-list').appendChild(div);
+}
+
+function saveCardio(){
+  const w = {
+    type: sessionType,
+    date: document.getElementById('c-date').value || new Date().toISOString().split('T')[0],
+    dur: +document.getElementById('c-dur').value,
+    dist: +document.getElementById('c-dist').value,
+    hr: +document.getElementById('c-hr').value,
+    maxhr: +document.getElementById('c-maxhr').value,
+    cal: +document.getElementById('c-cal').value,
+    z2: +document.getElementById('c-z2').value,
+    pace: document.getElementById('c-pace').value,
+    effort: +document.getElementById('c-effort').value,
+    notes: document.getElementById('c-notes').value
+  };
+  workouts.push(w);
+  saveAndExport();
+  toastMsg('Workout logged + CSV downloading ✓');
+  clearCardio();
+}
+
+function saveStrength(){
+  const rows = document.querySelectorAll('.ex-row');
+  const exercises = [];
+  rows.forEach(r=>{
+    const inputs = r.querySelectorAll('input');
+    exercises.push({name:inputs[0].value,sets:inputs[1].value,reps:inputs[2].value,weight:inputs[3].value});
+  });
+  const w = {
+    type: sessionType,
+    date: document.getElementById('s-date').value || new Date().toISOString().split('T')[0],
+    exercises,
+    notes: document.getElementById('s-notes').value
+  };
+  workouts.push(w);
+  saveAndExport();
+  toastMsg('Workout logged + CSV downloading ✓');
+  document.getElementById('ex-list').innerHTML=''; exCount=0;
+  document.getElementById('s-notes').value='';
+}
+
+function clearCardio(){
+  ['c-date','c-dur','c-dist','c-hr','c-maxhr','c-cal','c-z2','c-pace','c-effort','c-notes'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+}
+
+function toastMsg(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function renderHistory(){
+  const dyn = document.getElementById('dynamic-history');
+  dyn.innerHTML='';
+  const sorted = [...workouts].sort((a,b)=>b.date.localeCompare(a.date));
+  // skip first (pre-seeded #1 shown statically)
+  sorted.slice(0).forEach((w,i)=>{
+    if(w.date==='2026-04-22'&&i===sorted.length-1) return;
+    const isCardio = w.type.includes('Run')||w.type.includes('Interval')||w.type==='Active Recovery';
+    const card = document.createElement('div');
+    card.className='card';
+    card.style.cssText='margin-top:12px;border-left:3px solid '+(isCardio?'var(--o)':'var(--b)');
+    if(isCardio){
+      card.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+          <div><div style="font-weight:700;font-size:15px">${w.type}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:2px">${w.date}</div></div>
+          <span class="tag tc">${w.type.includes('Interval')?'Intervals':'Cardio'}</span>
+        </div>
+        <div class="g4" style="gap:8px;margin-bottom:8px">
+          <div style="text-align:center;padding:8px;background:var(--s2);border-radius:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">TIME</div><div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--o)">${w.dur} min</div></div>
+          <div style="text-align:center;padding:8px;background:var(--s2);border-radius:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">MILES</div><div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--b)">${w.dist||'—'}</div></div>
+          <div style="text-align:center;padding:8px;background:var(--s2);border-radius:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">AVG HR</div><div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--g)">${w.hr||'—'}</div></div>
+          <div style="text-align:center;padding:8px;background:var(--s2);border-radius:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">CALS</div><div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--y)">${w.cal||'—'}</div></div>
+        </div>
+        ${w.notes?`<div style="font-size:11px;color:var(--t2);padding:8px;background:var(--s2);border-radius:4px">${w.notes}</div>`:''}
+      `;
+    } else {
+      const exHtml = (w.exercises||[]).map(e=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="font-weight:600">${e.name}</span><span style="font-family:'JetBrains Mono',monospace;color:var(--b)">${e.sets}×${e.reps} @ ${e.weight}lbs</span></div>`).join('');
+      card.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+          <div><div style="font-weight:700;font-size:15px">${w.type}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:2px">${w.date}</div></div>
+          <span class="tag ts">Strength</span>
+        </div>
+        ${exHtml}
+        ${w.notes?`<div style="font-size:11px;color:var(--t2);padding:8px;background:var(--s2);border-radius:4px;margin-top:8px">${w.notes}</div>`:''}
+      `;
+    }
+    dyn.appendChild(card);
+  });
+  if(workouts.length<=1) dyn.innerHTML='<div class="empty" style="padding:20px;color:var(--t3);font-size:13px;text-align:center">Log more workouts to see them here.</div>';
+}
+
+function drawCharts(){
+  const cardio = workouts.filter(w=>w.type&&(w.type.includes('Run')||w.type.includes('Interval'))).sort((a,b)=>a.date.localeCompare(b.date));
+  const labels = cardio.map(w=>w.date.slice(5));
+  const hrs = cardio.map(w=>w.hr||0);
+  const dists = cardio.map(w=>w.dist||0);
+  const cals = cardio.map(w=>w.cal||0);
+
+  // Deadlift from strength logs
+  const dlData = workouts.filter(w=>w.exercises&&w.exercises.some(e=>e.name&&e.name.toLowerCase().includes('deadlift')));
+  const dlLabels = dlData.map(w=>w.date.slice(5));
+  const dlVals = dlData.map(w=>{
+    const dl = w.exercises.find(e=>e.name.toLowerCase().includes('deadlift'));
+    return dl ? +dl.weight : 0;
+  });
+
+  drawLine('hrChart', labels, hrs, '#00e5a0', 'Avg HR (bpm)', 100, 200);
+  drawLine('distChart', labels, dists, '#3d9eff', 'Miles', 0, 8);
+  drawLine('dlChart', dlLabels, dlVals, '#ff5500', 'Weight (lbs)', 100, 350);
+  drawLine('calChart', labels, cals, '#ffd93d', 'Calories', 0, 800);
+}
+
+function drawLine(id, labels, data, color, ylabel, ymin, ymax){
+  const canvas = document.getElementById(id);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth; const H = 140;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+
+  const pad = {t:10,r:10,b:30,l:44};
+  const cW = W-pad.l-pad.r; const cH = H-pad.t-pad.b;
+
+  // Grid
+  ctx.strokeStyle='#1e1e1e'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y = pad.t + (cH/4)*i;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+    const val = Math.round(ymax - ((ymax-ymin)/4)*i);
+    ctx.fillStyle='#444'; ctx.font='9px JetBrains Mono'; ctx.textAlign='right';
+    ctx.fillText(val, pad.l-4, y+3);
+  }
+
+  if(data.length===0){
+    ctx.fillStyle='#333'; ctx.font='11px Syne'; ctx.textAlign='center';
+    ctx.fillText('Log workouts to see data', W/2, H/2);
+    return;
+  }
+
+  // Line
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.lineJoin='round';
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x = pad.l + (i/(Math.max(data.length-1,1)))*cW;
+    const y = pad.t + cH - ((v-ymin)/(ymax-ymin))*cH;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Fill
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x = pad.l + (i/(Math.max(data.length-1,1)))*cW;
+    const y = pad.t + cH - ((v-ymin)/(ymax-ymin))*cH;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.lineTo(pad.l+cW, pad.t+cH); ctx.lineTo(pad.l, pad.t+cH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  grad.addColorStop(0,color+'44'); grad.addColorStop(1,color+'00');
+  ctx.fillStyle=grad; ctx.fill();
+
+  // Dots + labels
+  data.forEach((v,i)=>{
+    const x = pad.l + (i/(Math.max(data.length-1,1)))*cW;
+    const y = pad.t + cH - ((v-ymin)/(ymax-ymin))*cH;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+    if(labels[i]){
+      ctx.fillStyle='#555'; ctx.font='8px JetBrains Mono'; ctx.textAlign='center';
+      ctx.fillText(labels[i], x, H-8);
+    }
+  });
+}
+
+// ── NUTRITION STATE ────────────────────────────────────
+let mealType = 'Breakfast';
+let nutrition = JSON.parse(localStorage.getItem('dx_nutrition') || '[]');
+
+// ── NUTRITION CSV SCHEMA ───────────────────────────────
+const NUTR_HEADERS = [
+  'date','meal_type','food_item','serving_size','serving_unit',
+  'calories','protein_g','carbs_g','fat_g','sugar_g','fiber_g','notes'
+];
+
+function nutritionToCsvRows(data){
+  const rows = [NUTR_HEADERS.join(',')];
+  data.forEach(e => {
+    rows.push([
+      e.date, e.mealType, e.food, e.servingSize, e.servingUnit,
+      e.cal, e.pro, e.carb, e.fat, e.sugar, e.fiber, e.notes||''
+    ].map(escapeCsv).join(','));
+  });
+  return rows.join('\n');
+}
+
+function parseNutritionCsv(csvText){
+  const lines = csvText.trim().split('\n');
+  if(lines.length < 2) return [];
+  return lines.slice(1).filter(l=>l.trim()).map(line => {
+    const cols = parseCsvLine(line);
+    const [date,mealType,food,servingSize,servingUnit,cal,pro,carb,fat,sugar,fiber,notes] = cols;
+    return {date,mealType,food,servingSize,servingUnit,
+      cal:+cal||0,pro:+pro||0,carb:+carb||0,fat:+fat||0,sugar:+sugar||0,fiber:+fiber||0,notes:notes||''};
+  });
+}
+
+function saveNutritionLocal(){
+  localStorage.setItem('dx_nutrition', JSON.stringify(nutrition));
+}
+
+function exportNutritionCsv(){
+  const csv = nutritionToCsvRows(nutrition);
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  setTimeout(()=>downloadCsv(`devin_nutrition_backup_${ts}.csv`, csv), 400);
+  setTimeout(()=>downloadCsv('devin_nutrition.csv', csv), 900);
+  toastMsg('Nutrition CSV exported ✓');
+}
+
+function importNutritionCsv(){
+  document.getElementById('nutrition-import-input').click();
+}
+
+function handleNutritionImport(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const parsed = parseNutritionCsv(e.target.result);
+      if(!parsed.length){ toastMsg('⚠ No data found in file'); return; }
+      // Merge by date+mealType+food key
+      const existingKeys = new Set(nutrition.map(n=>n.date+'|'+n.mealType+'|'+n.food+'|'+n.servingSize));
+      const newEntries = parsed.filter(p=>!existingKeys.has(p.date+'|'+p.mealType+'|'+p.food+'|'+p.servingSize));
+      nutrition = [...nutrition, ...newEntries].sort((a,b)=>a.date.localeCompare(b.date));
+      saveNutritionLocal();
+      toastMsg(`Imported ${parsed.length} nutrition entries ✓`);
+      renderNutritionDay();
+    } catch(err){
+      toastMsg('⚠ Import error — check file format');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// ── QUICK ADD PRESETS ──────────────────────────────────
+const QUICK_FOODS = {
+  turkey:      {food:'HEB Honey Smoked Turkey',servingSize:2,servingUnit:'oz',cal:70,pro:10,carb:3,fat:1.5,sugar:3,fiber:0},
+  sourdough:   {food:'Sourdough Bread',servingSize:1,servingUnit:'slice',cal:150,pro:5,carb:29,fat:1,sugar:0,fiber:1},
+  cheddar:     {food:'Tillamook Cheddar',servingSize:1,servingUnit:'slice',cal:110,pro:6,carb:1,fat:9,sugar:0,fiber:0},
+  skyr:        {food:'Icelandic Skyr Yogurt (Lemon)',servingSize:1,servingUnit:'container',cal:160,pro:11,carb:12,fat:7,sugar:9,fiber:0},
+  banana:      {food:'Banana (medium)',servingSize:1,servingUnit:'piece',cal:105,pro:1,carb:27,fat:0,sugar:14,fiber:3},
+  mandarin:    {food:'Mandarin (small)',servingSize:1,servingUnit:'piece',cal:40,pro:1,carb:10,fat:0,sugar:8,fiber:1},
+  carrots:     {food:'Baby Carrots',servingSize:7,servingUnit:'oz',cal:85,pro:2,carb:20,fat:0,sugar:9,fiber:5},
+  pbcrackers:  {food:'PB Cracker Packet',servingSize:1,servingUnit:'packet',cal:190,pro:3,carb:24,fat:9,sugar:5,fiber:1},
+  whey:        {food:'Thorne Whey Protein Isolate',servingSize:1,servingUnit:'scoop',cal:100,pro:21,carb:4,fat:1,sugar:2,fiber:1},
+  cottage:     {food:'Cottage Cheese 2%',servingSize:0.5,servingUnit:'cup',cal:110,pro:14,carb:5,fat:3,sugar:3,fiber:0},
+  miraclewhip: {food:'Miracle Whip',servingSize:1,servingUnit:'tbsp',cal:35,pro:0,carb:2,fat:2,sugar:1,fiber:0},
+};
+
+function quickAdd(key){
+  const f = QUICK_FOODS[key];
+  if(!f) return;
+  document.getElementById('n-food').value = f.food;
+  document.getElementById('n-serving-size').value = f.servingSize;
+  document.getElementById('n-serving-unit').value = f.servingUnit;
+  document.getElementById('n-cal').value = f.cal;
+  document.getElementById('n-pro').value = f.pro;
+  document.getElementById('n-carb').value = f.carb;
+  document.getElementById('n-fat').value = f.fat;
+  document.getElementById('n-sugar').value = f.sugar;
+  document.getElementById('n-fiber').value = f.fiber;
+}
+
+function setMealType(type, btn){
+  mealType = type;
+  document.querySelectorAll('#meal-type-btns .btn').forEach(b=>b.className='btn btn-ghost btn-sm');
+  btn.className='btn btn-o btn-sm';
+}
+
+// ── SAVE NUTRITION ENTRY ───────────────────────────────
+function saveNutrition(){
+  const date = document.getElementById('n-date').value || new Date().toISOString().split('T')[0];
+  const food = document.getElementById('n-food').value.trim();
+  if(!food){ toastMsg('⚠ Enter a food item'); return; }
+  const entry = {
+    date, mealType,
+    food,
+    servingSize: document.getElementById('n-serving-size').value,
+    servingUnit: document.getElementById('n-serving-unit').value,
+    cal:   +document.getElementById('n-cal').value||0,
+    pro:   +document.getElementById('n-pro').value||0,
+    carb:  +document.getElementById('n-carb').value||0,
+    fat:   +document.getElementById('n-fat').value||0,
+    sugar: +document.getElementById('n-sugar').value||0,
+    fiber: +document.getElementById('n-fiber').value||0,
+    notes: document.getElementById('n-notes').value||''
+  };
+  nutrition.push(entry);
+  saveNutritionLocal();
+  // Export both files
+  const csv = nutritionToCsvRows(nutrition);
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  setTimeout(()=>downloadCsv(`devin_nutrition_backup_${ts}.csv`, csv), 400);
+  setTimeout(()=>downloadCsv('devin_nutrition.csv', csv), 900);
+  toastMsg('Food logged + CSV downloading ✓');
+  clearNutritionForm();
+  renderNutritionDay();
+}
+
+function clearNutritionForm(){
+  ['n-food','n-serving-size','n-cal','n-pro','n-carb','n-fat','n-sugar','n-fiber','n-notes']
+    .forEach(id => document.getElementById(id).value='');
+  document.getElementById('n-serving-unit').value='oz';
+}
+
+// ── RENDER DAILY SUMMARY ───────────────────────────────
+function renderNutritionDay(){
+  const dateInput = document.getElementById('n-view-date');
+  const date = dateInput.value || new Date().toISOString().split('T')[0];
+  document.getElementById('nutrition-date-label').textContent = date === new Date().toISOString().split('T')[0] ? 'Today' : date;
+
+  const dayEntries = nutrition.filter(e => e.date === date);
+
+  // Totals
+  const totCal  = dayEntries.reduce((s,e)=>s+e.cal,0);
+  const totPro  = dayEntries.reduce((s,e)=>s+e.pro,0);
+  const totCarb = dayEntries.reduce((s,e)=>s+e.carb,0);
+  const totFat  = dayEntries.reduce((s,e)=>s+e.fat,0);
+  const totSug  = dayEntries.reduce((s,e)=>s+e.sugar,0);
+  const totFib  = dayEntries.reduce((s,e)=>s+e.fiber,0);
+
+  const CAL_TARGET=2300, PRO_TARGET=165, CARB_TARGET=185, FAT_TARGET=75;
+
+  document.getElementById('n-total-cal').textContent  = totCal;
+  document.getElementById('n-total-pro').textContent  = totPro.toFixed(1)+'g';
+  document.getElementById('n-total-carb').textContent = totCarb.toFixed(1)+'g';
+  document.getElementById('n-total-fat').textContent  = totFat.toFixed(1)+'g';
+  document.getElementById('n-total-sugar').textContent= totSug.toFixed(1)+'g';
+  document.getElementById('n-total-fiber').textContent= totFib.toFixed(1)+'g';
+  document.getElementById('n-remaining').textContent  = Math.max(0, CAL_TARGET-totCal).toLocaleString();
+  document.getElementById('n-pro-gap').textContent    = Math.max(0, PRO_TARGET-totPro).toFixed(1)+'g';
+
+  const pct = (v,t)=>Math.min(100,Math.round(v/t*100))+'%';
+  document.getElementById('n-bar-cal').style.width  = pct(totCal,CAL_TARGET);
+  document.getElementById('n-bar-pro').style.width  = pct(totPro,PRO_TARGET);
+  document.getElementById('n-bar-carb').style.width = pct(totCarb,CARB_TARGET);
+  document.getElementById('n-bar-fat').style.width  = pct(totFat,FAT_TARGET);
+
+  // Color cal bar red if over target
+  document.getElementById('n-bar-cal').style.background = totCal > CAL_TARGET ? 'var(--r)' : 'var(--o)';
+
+  // Meal breakdown grouped by meal type
+  const mealOrder = ['Breakfast','Lunch','Dinner','Snack','Pre-Workout','Post-Workout','Supplement'];
+  const grouped = {};
+  dayEntries.forEach(e => {
+    if(!grouped[e.mealType]) grouped[e.mealType]=[];
+    grouped[e.mealType].push(e);
+  });
+
+  const container = document.getElementById('n-meal-breakdown');
+  if(!dayEntries.length){
+    container.innerHTML='<div style="color:var(--t3);font-size:13px;padding:16px 0;text-align:center">No entries for this date</div>';
+    return;
+  }
+
+  container.innerHTML = mealOrder.filter(m=>grouped[m]).map(meal => {
+    const items = grouped[meal];
+    const mCal = items.reduce((s,e)=>s+e.cal,0);
+    const mPro = items.reduce((s,e)=>s+e.pro,0);
+    const mCarb= items.reduce((s,e)=>s+e.carb,0);
+    const mFat = items.reduce((s,e)=>s+e.fat,0);
+    const rows = items.map(e=>`
+      <tr>
+        <td style="padding:8px 10px;font-size:12px;color:var(--text);border-bottom:1px solid var(--border)">${e.food}<br><span style="font-size:10px;color:var(--t3)">${e.servingSize} ${e.servingUnit}${e.notes?' · '+e.notes:''}</span></td>
+        <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--o);text-align:right;border-bottom:1px solid var(--border)">${e.cal}</td>
+        <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g);text-align:right;border-bottom:1px solid var(--border)">${e.pro.toFixed(1)}g</td>
+        <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--b);text-align:right;border-bottom:1px solid var(--border)">${e.carb.toFixed(1)}g</td>
+        <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p);text-align:right;border-bottom:1px solid var(--border)">${e.fat.toFixed(1)}g</td>
+        <td style="padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">
+          <button onclick="deleteNutritionEntry('${e.date}','${e.mealType}','${e.food.replace(/'/g,"\\'")}','${e.servingSize}')" style="background:none;border:none;color:var(--r);cursor:pointer;font-size:12px;padding:2px 6px">✕</button>
+        </td>
+      </tr>`).join('');
+    return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--s2);border-radius:4px 4px 0 0;border:1px solid var(--border);border-bottom:none">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--y)">${meal}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)">${mCal} cal · ${mPro.toFixed(1)}g pro · ${mCarb.toFixed(1)}g carb · ${mFat.toFixed(1)}g fat</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;background:var(--s1);border:1px solid var(--border);border-radius:0 0 4px 4px;overflow:hidden">
+          <thead><tr>
+            <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:left;border-bottom:1px solid var(--border)">Food</th>
+            <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;border-bottom:1px solid var(--border)">Cal</th>
+            <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;border-bottom:1px solid var(--border)">Pro</th>
+            <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;border-bottom:1px solid var(--border)">Carb</th>
+            <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;border-bottom:1px solid var(--border)">Fat</th>
+            <th style="padding:6px 10px;border-bottom:1px solid var(--border)"></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }).join('');
+}
+
+function deleteNutritionEntry(date, mealType, food, servingSize){
+  const idx = nutrition.findIndex(e=>e.date===date&&e.mealType===mealType&&e.food===food&&String(e.servingSize)===String(servingSize));
+  if(idx>-1){
+    nutrition.splice(idx,1);
+    saveNutritionLocal();
+    renderNutritionDay();
+    toastMsg('Entry removed');
+  }
+}
+
+// ── INIT WORKOUT DATES ─────────────────────────────────
+document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('s-date').value = new Date().toISOString().split('T')[0];
+
+// ── INIT NUTRITION ─────────────────────────────────────
+document.getElementById('n-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('n-view-date').value = new Date().toISOString().split('T')[0];
+renderNutritionDay();
+</script>
+</body>
+</html>
