@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div class="sh"><h2>Progress Charts</h2><span>updated as you log</span></div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card"><div class="card-title">Zone 2 Avg HR Over Time</div><canvas id="hrChart" height="140"></canvas></div>
+    <div class="card"><div class="card-title">Distance Per Run</div><canvas id="distChart" height="140"></canvas></div>
+  </div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card"><div class="card-title">Deadlift Progression (lbs)</div><canvas id="dlChart" height="140"></canvas></div>
+    <div class="card"><div class="card-title">Calories Burned Per Session</div><canvas id="calChart" height="140"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">12-Week Milestone Map</div>
+    {% set milestones = [
+      ("Wk 1–2",  "Phase 1", "Base Building — Complete first Zone 2 sessions",
+       "Zone 2 discipline established. No intervals. Sugar swaps begin.",
+       [("VO2: 43 baseline","--o","--o2"),("RHR: 69 baseline","--b","--b2"),("HRV: 46ms baseline","--p","--p2")]),
+      ("Wk 3–4",  "Phase 1", "First Intervals + Strength Loading",
+       "Norwegian 4×4 introduced Saturday. Zone 2 pace should feel slightly easier.",
+       [("Zone 2 pace: ~11:00","--g","--g2"),("RHR target: 66–68","--b","--b2")]),
+      ("Wk 5–6",  "Phase 2", "Visible Body Composition Shift",
+       "Two interval sessions/week. Mirror change becomes noticeable.",
+       [("VO2 target: 45–46","--o","--o2"),("Zone 2 pace: ~10:30","--g","--g2")]),
+      ("Wk 7–8",  "Phase 2", "VO2 Max Climbing — Check Apple Health",
+       "Apple Health VO2 estimate should tick upward. Resting HR approaching low 60s.",
+       [("VO2 target: 47–49","--o","--o2"),("RHR target: 62–64","--b","--b2"),("HRV target: 52–56ms","--p","--p2")]),
+      ("Wk 9–12", "Phase 3", "Peak Phase — Full Reassessment at Wk 12",
+       "Dramatic recomp visible. Zone 2 pace near 10:00/mi. Deadlift 265–285 lbs.",
+       [("VO2 target: 50–53","--o","--o2"),("RHR target: 60–63","--b","--b2"),("Zone 2 pace: ~10:00","--g","--g2")]),
+    ] %}
+    {% for wk, phase, title, body, metrics in milestones %}
+    <div class="ms">
+      <div><div class="ms-wk">{{ wk }}</div><div class="ms-phase">{{ phase }}</div></div>
+      <div>
+        <div class="ms-title">{{ title }}</div>
+        <div class="ms-body">{{ body }}</div>
+        <div class="ms-metrics">
+          {% for label, color, bg in metrics %}
+          <span class="ms-metric" style="background:var({{ bg }});color:var({{ color }})">{{ label }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>drawCharts();</script>{% endblock %}

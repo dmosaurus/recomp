@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div class="sh"><h2>Nutrition Log</h2><span>daily tracking</span></div>
+
+  <!-- DATE PICKER + TOTALS -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">
+      Daily Targets —
+      <input type="date" id="date-picker" value="{{ day }}" style="background:var(--s3);border:1px solid var(--border2);border-radius:3px;padding:4px 8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;margin-left:8px;outline:none" onchange="location.href='/nutrition?date='+this.value">
+    </div>
+    <div class="g4" style="margin-bottom:14px">
+      {% for label, val, color, pct, target, over in [
+        ('Calories',  totals.calories,    '--o', totals.cal_pct,  targets.cal,  totals.over_cal),
+        ('Protein',   totals.protein_g,   '--g', totals.pro_pct,  targets.pro,  false),
+        ('Carbs',     totals.carbs_g,     '--b', totals.carb_pct, targets.carb, false),
+        ('Fat',       totals.fat_g,       '--p', totals.fat_pct,  targets.fat,  false),
+      ] %}
+      <div class="stat-pill" style="border-left:3px solid var({{ color }})">
+        <div class="sp-label">{{ label }}</div>
+        <div class="sp-val" style="color:var({{ color }});font-size:24px">{{ val }}{% if label != 'Calories' %}g{% endif %}</div>
+        <div class="sp-sub">Target: {{ target }}{% if label != 'Calories' %}g{% endif %}</div>
+        <div class="prog-bar-wrap" style="margin-top:8px">
+          <div class="prog-bar" style="width:{{ pct }}%;background:{{ 'var(--r)' if over else 'var(' + color + ')' }}"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:16px;font-size:12px;color:var(--t2);flex-wrap:wrap">
+      <span>Sugar: <strong style="color:var(--r)">{{ totals.sugar_g }}g</strong></span>
+      <span>Fiber: <strong style="color:var(--g)">{{ totals.fiber_g }}g</strong></span>
+      <span>Remaining: <strong style="color:var(--y)">{{ totals.remaining_cal }} cal</strong></span>
+      <span>Protein gap: <strong style="color:var(--g)">{{ totals.pro_gap }}g</strong></span>
+    </div>
+  </div>
+
+  <!-- MEAL BREAKDOWN -->
+  {% set meal_order = ["Breakfast","Lunch","Dinner","Snack","Pre-Workout","Post-Workout","Supplement"] %}
+  {% set grouped = {} %}
+  {% for e in entries %}{% if grouped.update({e.meal_type: (grouped.get(e.meal_type) or []) + [e]}) %}{% endif %}{% endfor %}
+
+  {% if entries %}
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Meals</div>
+    {% for meal in meal_order %}{% if grouped.get(meal) %}
+    {% set items = grouped[meal] %}
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:4px 4px 0 0;border:1px solid var(--border);border-bottom:none">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--y)">{{ meal }}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)">
+          {{ items|sum(attribute='calories')|int }} cal ·
+          {{ "%.1f"|format(items|sum(attribute='protein_g')) }}g pro
+        </span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;background:var(--s1);border:1px solid var(--border)">
+        <thead><tr>
+          <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:left;border-bottom:1px solid var(--border)">Food</th>
+          <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;border-bottom:1px solid var(--border)">Cal</th>
+          <th style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;border-bottom:1px solid var(--border)">Pro</th>
+          <th style="padding:6px 10px;border-bottom:1px solid var(--border)"></th>
+        </tr></thead>
+        <tbody>
+        {% for e in items %}
+        <tr>
+          <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border)">
+            {{ e.food }}<br><span style="font-size:10px;color:var(--t3)">{{ e.serving_size }} {{ e.serving_unit }}{% if e.notes %} · {{ e.notes }}{% endif %}</span>
+          </td>
+          <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--o);text-align:right;border-bottom:1px solid var(--border)">{{ e.calories|int }}</td>
+          <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g);text-align:right;border-bottom:1px solid var(--border)">{{ "%.1f"|format(e.protein_g) }}g</td>
+          <td style="padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">
+            <form method="POST" action="/nutrition/delete" style="display:inline">
+              <input type="hidden" name="id" value="{{ e.id }}">
+              <input type="hidden" name="date" value="{{ day }}">
+              <button type="submit" style="background:none;border:none;color:var(--r);cursor:pointer;font-size:12px;padding:2px 6px">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- LOG FOOD FORM -->
+  <div class="card">
+    <div class="card-title">Log Food Item</div>
+    <form method="POST" action="/nutrition">
+      <input type="hidden" name="meal_type" id="meal-type-hidden" value="Breakfast">
+      <div class="log-form">
+        <div class="lf-title">// Food Entry</div>
+        <div id="meal-type-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+          {% for m in meal_types %}
+          <button type="button" class="btn {{ 'btn-o' if loop.first else 'btn-ghost' }} btn-sm" onclick="setMealType('{{ m }}',this)">{{ m }}</button>
+          {% endfor %}
+        </div>
+        <div class="lf-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="lf-field"><label>Date</label><input type="date" name="date" value="{{ day }}"></div>
+          <div class="lf-field" style="grid-column:span 2"><label>Food Item</label><input type="text" name="food" id="n-food" placeholder="e.g. HEB Honey Turkey"></div>
+          <div class="lf-field"><label>Serving Size</label><input type="number" step="0.1" name="serving_size" id="n-serving-size" placeholder="2"></div>
+          <div class="lf-field"><label>Serving Unit</label>
+            <select name="serving_unit" id="n-serving-unit">
+              <option>oz</option><option>g</option><option>cup</option><option>tbsp</option>
+              <option>tsp</option><option>slice</option><option>piece</option>
+              <option>scoop</option><option>container</option><option>packet</option><option>serving</option>
+            </select>
+          </div>
+          <div class="lf-field"><label>Calories</label><input type="number" name="calories" id="n-cal" placeholder="70"></div>
+          <div class="lf-field"><label>Protein (g)</label><input type="number" step="0.1" name="protein_g" id="n-pro" placeholder="10"></div>
+          <div class="lf-field"><label>Carbs (g)</label><input type="number" step="0.1" name="carbs_g" id="n-carb" placeholder="3"></div>
+          <div class="lf-field"><label>Fat (g)</label><input type="number" step="0.1" name="fat_g" id="n-fat" placeholder="1.5"></div>
+          <div class="lf-field"><label>Sugar (g)</label><input type="number" step="0.1" name="sugar_g" id="n-sugar" placeholder="3"></div>
+          <div class="lf-field"><label>Fiber (g)</label><input type="number" step="0.1" name="fiber_g" id="n-fiber" placeholder="0"></div>
+        </div>
+        <div class="lf-field" style="margin:10px 0"><label>Notes (optional)</label><input type="text" name="notes" placeholder="e.g. post-workout · pre-meal shake"></div>
+        <div style="margin-bottom:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Quick Add</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            {% for key in quick_foods %}
+            <button type="button" class="btn btn-ghost btn-sm" onclick="quickAdd('{{ key }}')">{{ quick_foods[key].food.split(' ')[0] }}{% if quick_foods[key].servingSize != 1 %} {{ quick_foods[key].servingSize }}{{ quick_foods[key].servingUnit }}{% endif %}</button>
+            {% endfor %}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-o">Save Food Entry</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

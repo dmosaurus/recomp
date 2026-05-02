@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div class="sh"><h2>Workout History</h2><span>all sessions</span></div>
+
+  {% if not workouts %}
+  <div class="empty"><p>No workouts logged yet.<br><a href="/log" style="color:var(--o)">Log your first session.</a></p></div>
+  {% endif %}
+
+  {% for w in workouts %}
+  {% set is_cardio = 'Run' in w.type or 'Interval' in w.type or w.type == 'Active Recovery' %}
+  <div class="card" style="margin-bottom:12px;border-left:3px solid {{ 'var(--o)' if is_cardio else 'var(--b)' }}">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+      <div>
+        <div style="font-weight:700;font-size:15px">{{ w.type }}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:2px">{{ w.date }}</div>
+      </div>
+      <span class="tag {{ 'tc' if is_cardio else 'ts' }}">{{ 'Cardio' if is_cardio else 'Strength' }}</span>
+    </div>
+
+    {% if is_cardio %}
+    <div class="g4" style="gap:8px;margin-bottom:8px">
+      {% for label, val, color in [('TIME', (w.duration_min|string + ' min') if w.duration_min else '—', 'var(--o)'), ('MILES', w.distance_mi or '—', 'var(--b)'), ('AVG HR', w.avg_hr or '—', 'var(--g)'), ('CALS', w.calories or '—', 'var(--y)')] %}
+      <div style="text-align:center;padding:8px;background:var(--s2);border-radius:4px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px">{{ label }}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:{{ color }}">{{ val }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    {% for ex in w.exercises %}
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <span style="font-weight:600">{{ ex.name }}</span>
+      <span style="font-family:'JetBrains Mono',monospace;color:var(--b)">{{ ex.sets }}×{{ ex.reps }} @ {{ ex.weight_lbs }}lbs</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if w.notes %}
+    <div style="font-size:11px;color:var(--t2);padding:8px;background:var(--s2);border-radius:4px;margin-top:8px">{{ w.notes }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

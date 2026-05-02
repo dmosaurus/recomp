@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div class="sh"><h2>Body Scan Upload</h2><span>GE CS10G PDF</span></div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Upload PDF from Scale</div>
+    <form method="POST" action="/body-scan/upload" enctype="multipart/form-data">
+      <div class="log-form">
+        <div class="lf-title">// GE CS10G Scan PDF</div>
+        <div class="lf-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+          <div class="lf-field">
+            <label>Scan Date (override if not parsed)</label>
+            <input type="date" name="date">
+          </div>
+          <div class="lf-field">
+            <label>PDF File</label>
+            <input type="file" name="pdf" accept=".pdf" style="background:var(--s3);border:1px solid var(--border2);border-radius:4px;padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;width:100%">
+          </div>
+        </div>
+        <div style="padding:10px 14px;background:var(--o3);border:1px solid var(--o);border-radius:4px;font-size:11px;color:var(--t2);margin-bottom:12px">
+          The parser extracts all metrics automatically from the PDF text layer. If parsing fails for any field, you can log it manually below.
+        </div>
+        <button type="submit" class="btn btn-o">Upload + Parse PDF</button>
+      </div>
+    </form>
+  </div>
+
+  {% if scan %}
+  <div class="card" style="border-left:3px solid var(--y)">
+    <div class="card-title">Current Scan — {{ scan.date }} · Score: {{ scan.score }}/100</div>
+    <div class="g4" style="gap:8px">
+      {% for label, val, unit, color in [
+        ('Body Weight',     scan.weight_lb,          'lb',  'var(--text)'),
+        ('Lean Body Mass',  scan.lean_mass_lb,        'lb',  'var(--g)'),
+        ('Skeletal Muscle', scan.skeletal_muscle_lb,  'lb',  'var(--g)'),
+        ('Body Fat Mass',   scan.fat_mass_lb,         'lb',  'var(--y)'),
+        ('Body Fat %',      scan.body_fat_pct,        '%',   'var(--y)'),
+        ('Visceral Fat',    scan.visceral_fat,        '/10', 'var(--y)'),
+        ('Waist-Hip Ratio', scan.waist_hip_ratio,     '',    'var(--r)'),
+        ('Bone Mass',       scan.bone_mass_lb,        'lb',  'var(--r)'),
+      ] %}
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase">{{ label }}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:{{ color }}">{{ val }}<span style="font-size:13px">{{ unit }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

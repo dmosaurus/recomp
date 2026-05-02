@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div class="sh"><h2>Log Workout</h2><span>capture every session</span></div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Session Type</div>
+    <div id="type-btns" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-o btn-sm"    onclick="setType('Zone 2 Run',this)">Zone 2 Run</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Norwegian Intervals',this)">Norwegian Intervals</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Upper Strength',this)">Upper Strength</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Lower Strength',this)">Lower Strength</button>
+      <button class="btn btn-ghost btn-sm" onclick="setType('Active Recovery',this)">Active Recovery</button>
+    </div>
+  </div>
+
+  <!-- CARDIO FORM -->
+  <div id="log-cardio" class="card" style="margin-bottom:14px">
+    <div class="card-title">Cardio Metrics</div>
+    <form method="POST" action="/log/cardio">
+      <input type="hidden" name="type" id="type-hidden" value="Zone 2 Run">
+      <div class="log-form">
+        <div class="lf-title">// Session Data</div>
+        <div class="lf-grid">
+          <div class="lf-field"><label>Date</label><input type="date" name="date" value="{{ today }}"></div>
+          <div class="lf-field"><label>Duration (min)</label><input type="number" name="duration_min" placeholder="63"></div>
+          <div class="lf-field"><label>Distance (mi)</label><input type="number" step="0.01" name="distance_mi" placeholder="4.68"></div>
+          <div class="lf-field"><label>Avg HR (bpm)</label><input type="number" name="avg_hr" placeholder="133"></div>
+          <div class="lf-field"><label>Max HR (bpm)</label><input type="number" name="max_hr" placeholder="154"></div>
+          <div class="lf-field"><label>Calories</label><input type="number" name="calories" placeholder="596"></div>
+          <div class="lf-field"><label>Zone 2 time (min)</label><input type="number" name="zone2_min" placeholder="33"></div>
+          <div class="lf-field"><label>Avg Pace (min/mi)</label><input type="text" name="avg_pace" placeholder="13:33"></div>
+          <div class="lf-field"><label>Effort (1–10)</label><input type="number" min="1" max="10" name="effort" placeholder="5"></div>
+        </div>
+        <div class="lf-field" style="margin-bottom:12px"><label>Notes</label><textarea name="notes" placeholder="How did it feel? HR drift? Breathing?"></textarea></div>
+        <button type="submit" class="btn btn-o">Save Session</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- STRENGTH FORM -->
+  <div id="log-strength" class="card" style="display:none;margin-bottom:14px">
+    <div class="card-title">Strength Metrics</div>
+    <form method="POST" action="/log/strength">
+      <input type="hidden" name="type" id="type-hidden-s" value="Upper Strength">
+      <div class="log-form">
+        <div class="lf-title">// Lift Data</div>
+        <div class="lf-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+          <div class="lf-field"><label>Date</label><input type="date" name="date" value="{{ today }}"></div>
+        </div>
+        <div id="ex-list"></div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addExercise()" style="margin-bottom:12px">+ Add Exercise</button>
+        <div class="lf-field" style="margin-bottom:12px"><label>Notes</label><textarea name="notes" placeholder="What felt strong? Any form issues?"></textarea></div>
+        <button type="submit" class="btn btn-o">Save Session</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById("type-hidden-s").onchange = function() {
+    document.getElementById("type-hidden").value = this.value;
+  };
+  // Sync both hidden inputs when type is set
+  const _setType = setType;
+  setType = function(type, btn) {
+    _setType(type, btn);
+    document.getElementById("type-hidden-s").value = type;
+  };
+</script>
+{% endblock %}

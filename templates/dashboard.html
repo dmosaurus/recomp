@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div style="margin-bottom:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--o);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">// Week 1 · Phase 1 · Apr 2026</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;line-height:0.95;margin-bottom:8px">YOUR <span style="color:var(--o)">STARTING</span><br>BASELINES</div>
+    <div style="font-size:13px;color:var(--t2);font-weight:400">Captured Apr 22, 2026 · Compare at weeks 4, 8, 12</div>
+  </div>
+
+  <div class="g4" style="margin-bottom:14px">
+    <div class="stat-pill" style="border-left:3px solid var(--o)">
+      <div class="sp-label">VO2 Max</div>
+      <div class="sp-val" style="color:var(--o)">{{ baselines.vo2_max }}</div>
+      <div class="sp-sub">ml/kg/min · Below Avg</div>
+    </div>
+    <div class="stat-pill" style="border-left:3px solid var(--b)">
+      <div class="sp-label">Resting HR</div>
+      <div class="sp-val" style="color:var(--b)">{{ baselines.resting_hr }}</div>
+      <div class="sp-sub">bpm · Trend: None</div>
+    </div>
+    <div class="stat-pill" style="border-left:3px solid var(--p)">
+      <div class="sp-label">HRV Avg</div>
+      <div class="sp-val" style="color:var(--p)">{{ baselines.hrv_avg }}</div>
+      <div class="sp-sub">ms · Low-end for age</div>
+    </div>
+    <div class="stat-pill" style="border-left:3px solid var(--g)">
+      <div class="sp-label">Zone 2 Pace</div>
+      <div class="sp-val" style="color:var(--g)">{{ baselines.zone2_pace }}</div>
+      <div class="sp-sub">min/mi at 133–140 bpm</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    {% if summary.last %}
+    <div class="card">
+      <div class="card-title">Last Workout — {{ summary.last.date }}</div>
+      <div class="g3" style="gap:8px">
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px">TIME</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--o)">{{ summary.last.duration_min or '—' }} min</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px">MILES</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--b)">{{ summary.last.distance_mi or '—' }}</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s2);border-radius:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:4px">AVG HR</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--g)">{{ summary.last.avg_hr or '—' }}</div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="card"><div style="color:var(--t3);font-size:13px;padding:16px 0">No workouts logged yet. <a href="/log" style="color:var(--o)">Log your first.</a></div></div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-title">This Week</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+            <span style="color:var(--t2)">Sessions this week</span>
+            <span style="font-family:'JetBrains Mono',monospace;color:var(--o)">{{ summary.count }}</span>
+          </div>
+          <div class="prog-bar-wrap"><div class="prog-bar" style="width:{{ [summary.count * 16, 100] | min }}%;background:var(--o)"></div></div>
+        </div>
+        <div style="font-size:12px;color:var(--t2)">Phase 1 · Weeks 1–4 · Base Building</div>
+      </div>
+    </div>
+  </div>
+
+  {% if scan %}
+  <div class="card" style="border-left:3px solid var(--y)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--y);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px">// GE CS10G Body Scan</div>
+        <div style="font-size:12px;color:var(--t2);font-weight:400">{{ scan.date }} · Rescan at Week 12</div>
+      </div>
+      <div style="background:var(--y);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;padding:6px 14px;border-radius:4px;letter-spacing:1px">{{ scan.score }} / 100</div>
+    </div>
+    <div class="g4" style="margin-bottom:10px">
+      {% set metrics = [
+        ("Body Weight",      scan.weight_lb,          "lb",  "--text",  ""),
+        ("Lean Body Mass",   scan.lean_mass_lb,        "lb",  "--g",     ""),
+        ("Skeletal Muscle",  scan.skeletal_muscle_lb,  "lb",  "--g",     "Above normal"),
+        ("Body Fat Mass",    scan.fat_mass_lb,         "lb",  "--y",     ""),
+      ] %}
+      {% for label, val, unit, color, note in metrics %}
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:14px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase">{{ label }}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var({{ color }})">{{ val }}<span style="font-size:14px">{{ unit }}</span></div>
+        {% if note %}<div style="font-size:10px;color:var({{ color }});margin-top:2px">{{ note }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="g4">
+      {% set metrics2 = [
+        ("Body Fat %",       scan.body_fat_pct,      "%",    "--y",  "Athletic = 10–15%"),
+        ("Visceral Fat",     scan.visceral_fat,      "/10",  "--y",  "Under 10 = OK"),
+        ("Waist-Hip Ratio",  scan.waist_hip_ratio,   "",     "--r",  "Target ≤ 0.9"),
+        ("Bone Mass",        scan.bone_mass_lb,      "lb",   "--r",  "Slightly low"),
+      ] %}
+      {% for label, val, unit, color, note in metrics2 %}
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:14px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase">{{ label }}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var({{ color }})">{{ val }}<span style="font-size:14px">{{ unit }}</span></div>
+        <div style="font-size:10px;color:var({{ color }});margin-top:2px">{{ note }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:12px;text-align:right">
+      <a href="/body-scan" class="btn btn-ghost btn-sm">Upload new scan PDF</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <div id="phase-tabs" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn btn-o btn-sm"    onclick="showPhase(1,this)">Phase 1 — Wk 1–4</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPhase(2,this)">Phase 2 — Wk 5–8</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPhase(3,this)">Phase 3 — Wk 9–12</button>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div id="phase1">
+    <div class="phase-badge">
+      <div class="pb-num">01</div>
+      <div><div class="pb-text">Base Building</div><div class="pb-sub">Weeks 1–4 · Aerobic foundation + movement patterns</div></div>
+    </div>
+    <div style="background:var(--o3);border:1px solid var(--o);border-radius:5px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text);line-height:1.6">
+      <strong style="color:var(--o)">Overload Strategy:</strong> Zone 2 run duration +5 min/week. Lifting: add 5 lbs to lower body, 2.5 lbs upper body each week reps are completed cleanly. No intervals until Week 3.
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Phase 1 Schedule</div>
+      <table class="ex-table">
+        <tr><th>Day</th><th>Session</th><th>Duration</th><th>Key Focus</th></tr>
+        <tr><td class="ex-name">Monday</td><td>Upper Body Strength</td><td class="ex-sets">40–50 min</td><td><span class="overload-badge">+2.5 lbs upper / +1 rep/wk</span></td></tr>
+        <tr><td class="ex-name">Tuesday</td><td>Zone 2 Run — Long</td><td class="ex-sets">45→60 min</td><td><span class="overload-badge">+5 min each week · nose breathe only</span></td></tr>
+        <tr><td class="ex-name">Wednesday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Recovery between run and leg day</td></tr>
+        <tr><td class="ex-name">Thursday</td><td>Lower Body Strength</td><td class="ex-sets">40–50 min</td><td><span class="overload-badge">+5–10 lbs lower / trap bar focus</span></td></tr>
+        <tr><td class="ex-name">Friday</td><td>Zone 2 Run — Short</td><td class="ex-sets">30–35 min</td><td><span class="overload-badge">Active recovery · clears leg soreness from Thu</span></td></tr>
+        <tr><td class="ex-name">Saturday</td><td>Wk 1–2: Rest · Wk 3+: Norwegian 4×4</td><td class="ex-sets">0→55 min</td><td><span class="overload-badge">Intervals begin Week 3 only</span></td></tr>
+        <tr><td class="ex-name">Sunday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable recovery</td></tr>
+      </table>
+    </div>
+
+    {% set upper_body = [
+      ("Pull-Ups","Full ROM · dead hang start","3 × 6–8","Bodyweight","+1 rep/wk → add weight at 10"),
+      ("Dips","Chest forward for pec · upright for tri","3 × 8–10","Bodyweight","+1 rep/wk → add weight at 12"),
+      ("DB Row","Each arm · elbow drives to hip","3 × 10","40 lbs","+2.5 lbs/wk"),
+      ("Overhead Press","DB or bar · strict form · no leg drive","3 × 8","30 lbs DB","+2.5 lbs/wk"),
+      ("Face Pulls / Band Pull-Apart","Rear delt health · rotator cuff","3 × 15","Light band","+5 reps/2wks"),
+      ("Ab Wheel / Plank","Alternate each session","3 × max / 3 × 30s","—","+5s plank / +1 rep/wk"),
+    ] %}
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Monday — Upper Body Strength <span class="tag ts" style="margin-left:8px">Lift</span></div>
+      <table class="ex-table"><tr><th>Exercise</th><th>Sets × Reps</th><th>Wk 1 Load</th><th>Progression</th></tr>
+      {% for name, note, sets, load, prog in upper_body %}
+      <tr><td><div class="ex-name">{{ name }}</div><div class="ex-note">{{ note }}</div></td><td class="ex-sets">{{ sets }}</td><td class="ex-load">{{ load }}</td><td><span class="overload-badge">{{ prog }}</span></td></tr>
+      {% endfor %}
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Tuesday — Zone 2 Run Long <span class="tag tc" style="margin-left:8px">Cardio</span></div>
+      <table class="ex-table"><tr><th>Phase</th><th>Duration</th><th>Target HR</th><th>Notes</th></tr>
+        <tr><td class="ex-name">Warm-up walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;120 bpm</td><td class="ex-note">Brisk 3.5 mph</td></tr>
+        <tr><td class="ex-name">Zone 2 sustained</td><td class="ex-sets">Wk1: 40min → Wk4: 55min</td><td class="ex-load">133–140 bpm</td><td class="ex-note">Nose breathing only · slow pace to protect zone</td></tr>
+        <tr><td class="ex-name">Cool-down walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;100 bpm</td><td class="ex-note">Do not skip</td></tr>
+      </table>
+    </div>
+
+    {% set lower_body = [
+      ("Trap Bar Deadlift","Your strongest pattern · build from here","4 × 5","185 lbs","+10 lbs/wk until form breaks"),
+      ("Goblet Squat","KB or DB · full depth · 3s eccentric","3 × 10","45 lbs","+5 lbs/wk"),
+      ("Romanian Deadlift","Hamstring hinge · slight knee bend","3 × 10","95 lbs bar","+5 lbs/wk"),
+      ("Reverse Lunges","Each leg · DB in hands · knee tracks over toe","3 × 8/leg","25 lbs DB","+5 lbs/2wks"),
+      ("Calf Raises","Single leg · slow tempo · full ROM","3 × 15","Bodyweight","+DB weight wk 3"),
+    ] %}
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Thursday — Lower Body Strength <span class="tag ts" style="margin-left:8px">Lift</span></div>
+      <table class="ex-table"><tr><th>Exercise</th><th>Sets × Reps</th><th>Wk 1 Load</th><th>Progression</th></tr>
+      {% for name, note, sets, load, prog in lower_body %}
+      <tr><td><div class="ex-name">{{ name }}</div><div class="ex-note">{{ note }}</div></td><td class="ex-sets">{{ sets }}</td><td class="ex-load">{{ load }}</td><td><span class="overload-badge">{{ prog }}</span></td></tr>
+      {% endfor %}
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Saturday — Norwegian 4×4 (Begins Week 3) <span class="tag tg" style="margin-left:8px">Intervals</span></div>
+      <div style="padding:10px 12px;background:var(--b2);border-radius:4px;font-size:12px;color:var(--b);margin-bottom:12px"><strong>Weeks 1–2:</strong> Complete rest or 20–30 min easy walk only.</div>
+      <table class="ex-table"><tr><th>Phase</th><th>Duration</th><th>Target HR</th><th>Notes</th></tr>
+        <tr><td class="ex-name">Warm-up jog</td><td class="ex-sets">10 min</td><td class="ex-load">133–140 bpm</td><td class="ex-note">Build gradually before first interval</td></tr>
+        <tr><td class="ex-name">4× Hard intervals</td><td class="ex-sets">4 min each</td><td class="ex-load">180–190 bpm</td><td class="ex-note">Only 2–3 words out. Controlled, not a sprint</td></tr>
+        <tr><td class="ex-name">4× Active recovery</td><td class="ex-sets">3 min each</td><td class="ex-load">~120 bpm</td><td class="ex-note">HR must drop to ~120 before next rep</td></tr>
+        <tr><td class="ex-name">Cool-down walk</td><td class="ex-sets">5 min</td><td class="ex-load">&lt;100 bpm</td><td class="ex-note">Do not stop abruptly</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div id="phase2" style="display:none">
+    <div class="phase-badge" style="background:var(--b2);border-color:var(--b)">
+      <div class="pb-num" style="color:var(--b)">02</div>
+      <div><div class="pb-text">Load Introduction</div><div class="pb-sub">Weeks 5–8 · Add intervals · Increase weights · Extend long run</div></div>
+    </div>
+    <div style="background:var(--b2);border:1px solid var(--b);border-radius:5px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.6">
+      <strong style="color:var(--b)">Overload Strategy:</strong> Two Norwegian 4×4 sessions/week (Tue + Sat). Long run extended to 60–70 min. Lift weights increase 5–10% from Phase 1 final week.
+    </div>
+    <div class="card">
+      <div class="card-title">Phase 2 Schedule</div>
+      <table class="ex-table">
+        <tr><th>Day</th><th>Session</th><th>Duration</th><th>Key Change from Ph.1</th></tr>
+        <tr><td class="ex-name">Monday</td><td>Upper Strength</td><td class="ex-sets">45–55 min</td><td><span class="overload-badge">+5–10% weight from Ph.1 peak</span></td></tr>
+        <tr><td class="ex-name">Tuesday</td><td>Zone 2 Long Run</td><td class="ex-sets">60–70 min</td><td><span class="overload-badge">+10–15 min from Phase 1</span></td></tr>
+        <tr><td class="ex-name">Wednesday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Recovery between long run and leg day</td></tr>
+        <tr><td class="ex-name">Thursday</td><td>Lower Strength</td><td class="ex-sets">45–55 min</td><td><span class="overload-badge">Straight bar deadlift introduced</span></td></tr>
+        <tr><td class="ex-name">Friday</td><td>Zone 2 Short Run</td><td class="ex-sets">35 min</td><td><span class="overload-badge">Active recovery · pace now 10:30–11:00 at same HR</span></td></tr>
+        <tr><td class="ex-name">Saturday</td><td>Norwegian 4×4 Intervals</td><td class="ex-sets">45 min</td><td><span class="overload-badge">5 intervals if 4 felt easy in Ph.1</span></td></tr>
+        <tr><td class="ex-name">Sunday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable recovery</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div id="phase3" style="display:none">
+    <div class="phase-badge" style="background:var(--g2);border-color:var(--g)">
+      <div class="pb-num" style="color:var(--g)">03</div>
+      <div><div class="pb-text">Peak Intensity</div><div class="pb-sub">Weeks 9–12 · Max VO2 stimulus · Strength peaks · Recomp visible</div></div>
+    </div>
+    <div style="background:var(--g2);border:1px solid var(--g);border-radius:5px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.6">
+      <strong style="color:var(--g)">Overload Strategy:</strong> Long run 70–80 min. Add 5×4 Norwegian sets. Straight bar deadlift targets 265–285 lbs. Re-test Zone 2 pace at week 12.
+    </div>
+    <div class="card">
+      <div class="card-title">Phase 3 Schedule</div>
+      <table class="ex-table">
+        <tr><th>Day</th><th>Session</th><th>Duration</th><th>Key Target</th></tr>
+        <tr><td class="ex-name">Monday</td><td>Upper Strength</td><td class="ex-sets">50–60 min</td><td><span class="overload-badge">Pull-ups +weight · Press PR attempt</span></td></tr>
+        <tr><td class="ex-name">Tuesday</td><td>Zone 2 Long Run</td><td class="ex-sets">70–80 min</td><td><span class="overload-badge">Zone 2 pace should be ~10:00/mi now</span></td></tr>
+        <tr><td class="ex-name">Wednesday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable — long run recovery</td></tr>
+        <tr><td class="ex-name">Thursday</td><td>Lower Strength</td><td class="ex-sets">50–60 min</td><td><span class="overload-badge">Deadlift 265–285 lbs target</span></td></tr>
+        <tr><td class="ex-name">Friday</td><td>Zone 2 Short + Strides</td><td class="ex-sets">40 min</td><td><span class="overload-badge">Active recovery + 4×20s strides at end</span></td></tr>
+        <tr><td class="ex-name">Saturday</td><td>Norwegian 5×4 Intervals</td><td class="ex-sets">50 min</td><td><span class="overload-badge">HR should hit 185–192 by rep 4–5</span></td></tr>
+        <tr><td class="ex-name">Sunday</td><td>Full Rest</td><td class="ex-sets">—</td><td>Non-negotiable recovery</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
