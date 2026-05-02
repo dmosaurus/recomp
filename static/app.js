@@ -76,7 +76,7 @@ function drawLine(id, labels, data, color, ymin, ymax) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  const W = canvas.offsetWidth, H = 140;
+  const W = canvas.parentElement.offsetWidth || 400, H = 160;
   canvas.width = W; canvas.height = H;
   ctx.clearRect(0, 0, W, H);
   const pad = { t: 10, r: 10, b: 30, l: 44 };

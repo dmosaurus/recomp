@@ -3,13 +3,11 @@
 <div class="panel">
   <div class="sh"><h2>Progress Charts</h2><span>updated as you log</span></div>
 
-  <div class="g2" style="margin-bottom:14px">
-    <div class="card"><div class="card-title">Zone 2 Avg HR Over Time</div><canvas id="hrChart" height="140"></canvas></div>
-    <div class="card"><div class="card-title">Distance Per Run</div><canvas id="distChart" height="140"></canvas></div>
-  </div>
-  <div class="g2" style="margin-bottom:14px">
-    <div class="card"><div class="card-title">Deadlift Progression (lbs)</div><canvas id="dlChart" height="140"></canvas></div>
-    <div class="card"><div class="card-title">Calories Burned Per Session</div><canvas id="calChart" height="140"></canvas></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div class="card" style="margin-top:0"><div class="card-title">Zone 2 Avg HR Over Time</div><div style="height:160px"><canvas id="hrChart" style="display:block;width:100%"></canvas></div></div>
+    <div class="card" style="margin-top:0"><div class="card-title">Distance Per Run (mi)</div><div style="height:160px"><canvas id="distChart" style="display:block;width:100%"></canvas></div></div>
+    <div class="card" style="margin-top:0"><div class="card-title">Deadlift Progression (lbs)</div><div style="height:160px"><canvas id="dlChart" style="display:block;width:100%"></canvas></div></div>
+    <div class="card" style="margin-top:0"><div class="card-title">Calories Burned Per Session</div><div style="height:160px"><canvas id="calChart" style="display:block;width:100%"></canvas></div></div>
   </div>
 
   <div class="card">
