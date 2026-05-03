@@ -71,6 +71,31 @@ def delete_nutrition(db, entry_id):
     db.execute("DELETE FROM nutrition WHERE id=?", (entry_id,))
     db.commit()
 
+def update_nutrition(db, entry_id, data):
+    db.execute(
+        "UPDATE nutrition SET date=?,meal_type=?,food=?,serving_size=?,serving_unit=?,calories=?,protein_g=?,carbs_g=?,fat_g=?,sugar_g=?,fiber_g=?,notes=? WHERE id=?",
+        (data["date"], data["meal_type"], data["food"], data.get("serving_size"), data.get("serving_unit"),
+         _f(data,"calories"), _f(data,"protein_g"), _f(data,"carbs_g"), _f(data,"fat_g"),
+         _f(data,"sugar_g"), _f(data,"fiber_g"), data.get("notes",""), entry_id)
+    )
+    db.commit()
+
+def get_saved_foods(db):
+    return [dict(r) for r in db.execute("SELECT * FROM saved_foods ORDER BY created_at DESC").fetchall()]
+
+def save_food(db, data):
+    db.execute(
+        "INSERT INTO saved_foods (food,serving_size,serving_unit,calories,protein_g,carbs_g,fat_g,sugar_g,fiber_g) VALUES (?,?,?,?,?,?,?,?,?)",
+        (data["food"], data.get("serving_size"), data.get("serving_unit"),
+         _f(data,"calories"), _f(data,"protein_g"), _f(data,"carbs_g"),
+         _f(data,"fat_g"), _f(data,"sugar_g"), _f(data,"fiber_g"))
+    )
+    db.commit()
+
+def delete_saved_food(db, food_id):
+    db.execute("DELETE FROM saved_foods WHERE id=?", (food_id,))
+    db.commit()
+
 # ── Body Scans ─────────────────────────────────────────────────────────────────
 
 def get_latest_body_scan(db):

@@ -70,6 +70,49 @@ function quickAdd(key) {
   document.getElementById("n-fiber").value        = f.fiber;
 }
 
+function quickAddSaved(f) {
+  document.getElementById("n-food").value         = f.food || '';
+  document.getElementById("n-serving-size").value = f.serving_size || '';
+  const su = document.getElementById("n-serving-unit");
+  for (let i = 0; i < su.options.length; i++) {
+    if (su.options[i].value === f.serving_unit) { su.selectedIndex = i; break; }
+  }
+  document.getElementById("n-cal").value   = f.calories || '';
+  document.getElementById("n-pro").value   = f.protein_g || '';
+  document.getElementById("n-carb").value  = f.carbs_g || '';
+  document.getElementById("n-fat").value   = f.fat_g || '';
+  document.getElementById("n-sugar").value = f.sugar_g || '';
+  document.getElementById("n-fiber").value = f.fiber_g || '';
+}
+
+function editNutrition(d) {
+  quickAddSaved(d);
+  document.getElementById("n-notes").value    = d.notes || '';
+  document.getElementById("n-edit-id").value  = d.id;
+  document.querySelectorAll("#meal-type-btns .btn").forEach(b => {
+    b.className = "btn btn-ghost btn-sm";
+    if (b.textContent.trim() === d.meal_type) {
+      b.className = "btn btn-o btn-sm";
+      document.getElementById("meal-type-hidden").value = d.meal_type;
+    }
+  });
+  document.getElementById("log-food-form").action      = "/nutrition/update";
+  document.getElementById("n-submit-btn").textContent  = "Update Entry";
+  document.getElementById("n-cancel-edit").style.display = "inline-flex";
+  document.getElementById("log-food-card").scrollIntoView({behavior: "smooth"});
+}
+
+function cancelEdit() {
+  document.getElementById("log-food-form").reset();
+  document.getElementById("log-food-form").action     = "/nutrition";
+  document.getElementById("n-edit-id").value          = "";
+  document.getElementById("n-submit-btn").textContent = "Save Food Entry";
+  document.getElementById("n-cancel-edit").style.display = "none";
+  const btns = document.querySelectorAll("#meal-type-btns .btn");
+  btns.forEach(b => b.className = "btn btn-ghost btn-sm");
+  if (btns[0]) { btns[0].className = "btn btn-o btn-sm"; document.getElementById("meal-type-hidden").value = btns[0].textContent.trim(); }
+}
+
 // ── Charts ────────────────────────────────────────────────────────────────────
 
 function drawLine(id, labels, data, color, ymin, ymax) {

@@ -41,6 +41,14 @@ def init_db():
             bmr INTEGER, score REAL, notes TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
+        CREATE TABLE IF NOT EXISTS saved_foods (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            food TEXT NOT NULL,
+            serving_size TEXT, serving_unit TEXT,
+            calories REAL, protein_g REAL, carbs_g REAL, fat_g REAL,
+            sugar_g REAL, fiber_g REAL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
     """)
     db.commit()
     seed_db(db)

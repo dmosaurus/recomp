@@ -67,11 +67,25 @@
           </td>
           <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--o);text-align:right;border-bottom:1px solid var(--border)">{{ e.calories|int }}</td>
           <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g);text-align:right;border-bottom:1px solid var(--border)">{{ "%.1f"|format(e.protein_g) }}g</td>
-          <td style="padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap">
+            <button type="button" onclick='editNutrition({{ {"id": e.id, "meal_type": e.meal_type, "food": e.food, "serving_size": (e.serving_size or "")|string, "serving_unit": e.serving_unit or "", "calories": e.calories or 0, "protein_g": e.protein_g or 0, "carbs_g": e.carbs_g or 0, "fat_g": e.fat_g or 0, "sugar_g": e.sugar_g or 0, "fiber_g": e.fiber_g or 0, "notes": e.notes or ""} | tojson }})' style="background:none;border:none;color:var(--b);cursor:pointer;font-size:11px;padding:2px 4px">edit</button>
+            <form method="POST" action="/nutrition/pin" style="display:inline">
+              <input type="hidden" name="date" value="{{ day }}">
+              <input type="hidden" name="food" value="{{ e.food }}">
+              <input type="hidden" name="serving_size" value="{{ e.serving_size or '' }}">
+              <input type="hidden" name="serving_unit" value="{{ e.serving_unit or '' }}">
+              <input type="hidden" name="calories" value="{{ e.calories or '' }}">
+              <input type="hidden" name="protein_g" value="{{ e.protein_g or '' }}">
+              <input type="hidden" name="carbs_g" value="{{ e.carbs_g or '' }}">
+              <input type="hidden" name="fat_g" value="{{ e.fat_g or '' }}">
+              <input type="hidden" name="sugar_g" value="{{ e.sugar_g or '' }}">
+              <input type="hidden" name="fiber_g" value="{{ e.fiber_g or '' }}">
+              <button type="submit" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:11px;padding:2px 4px">pin</button>
+            </form>
             <form method="POST" action="/nutrition/delete" style="display:inline">
               <input type="hidden" name="id" value="{{ e.id }}">
               <input type="hidden" name="date" value="{{ day }}">
-              <button type="submit" style="background:none;border:none;color:var(--r);cursor:pointer;font-size:12px;padding:2px 6px">✕</button>
+              <button type="submit" style="background:none;border:none;color:var(--r);cursor:pointer;font-size:12px;padding:2px 4px">✕</button>
             </form>
           </td>
         </tr>
@@ -84,10 +98,11 @@
   {% endif %}
 
   <!-- LOG FOOD FORM -->
-  <div class="card">
+  <div class="card" id="log-food-card">
     <div class="card-title">Log Food Item</div>
-    <form method="POST" action="/nutrition">
+    <form method="POST" action="/nutrition" id="log-food-form">
       <input type="hidden" name="meal_type" id="meal-type-hidden" value="Breakfast">
+      <input type="hidden" name="id" id="n-edit-id" value="">
       <div class="log-form">
         <div class="lf-title">// Food Entry</div>
         <div id="meal-type-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
@@ -113,16 +128,27 @@
           <div class="lf-field"><label>Sugar (g)</label><input type="number" step="0.1" name="sugar_g" id="n-sugar" placeholder="3"></div>
           <div class="lf-field"><label>Fiber (g)</label><input type="number" step="0.1" name="fiber_g" id="n-fiber" placeholder="0"></div>
         </div>
-        <div class="lf-field" style="margin:10px 0"><label>Notes (optional)</label><input type="text" name="notes" placeholder="e.g. post-workout · pre-meal shake"></div>
+        <div class="lf-field" style="margin:10px 0"><label>Notes (optional)</label><input type="text" name="notes" id="n-notes" placeholder="e.g. post-workout · pre-meal shake"></div>
         <div style="margin-bottom:14px">
           <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Quick Add</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
+            {% for sf in saved_foods %}
+            <span style="display:inline-flex;align-items:center">
+              <button type="button" class="btn btn-ghost btn-sm" style="border-radius:3px 0 0 3px;border-right:none" onclick='quickAddSaved({{ sf | tojson }})'>{{ sf.food.split(' ')[0] }}</button>
+              <form method="POST" action="/nutrition/unpin" style="display:inline;margin:0">
+                <input type="hidden" name="id" value="{{ sf.id }}">
+                <input type="hidden" name="date" value="{{ day }}">
+                <button type="submit" style="background:var(--s2);border:1px solid var(--border2);border-radius:0 3px 3px 0;color:var(--t3);cursor:pointer;font-size:9px;padding:0 6px;height:26px">✕</button>
+              </form>
+            </span>
+            {% endfor %}
             {% for key in quick_foods %}
             <button type="button" class="btn btn-ghost btn-sm" onclick="quickAdd('{{ key }}')">{{ quick_foods[key].food.split(' ')[0] }}{% if quick_foods[key].servingSize != 1 %} {{ quick_foods[key].servingSize }}{{ quick_foods[key].servingUnit }}{% endif %}</button>
             {% endfor %}
           </div>
         </div>
-        <button type="submit" class="btn btn-o">Save Food Entry</button>
+        <button type="submit" class="btn btn-o" id="n-submit-btn">Save Food Entry</button>
+        <button type="button" id="n-cancel-edit" onclick="cancelEdit()" class="btn btn-ghost" style="display:none;margin-left:8px">Cancel</button>
       </div>
     </form>
   </div>
